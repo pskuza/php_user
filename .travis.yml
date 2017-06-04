@@ -12,8 +12,7 @@ install:
     - composer install
 before_script:
     - curl http://cs.sensiolabs.org/download/php-cs-fixer-v2.phar -o php-cs-fixer.phar
-    - ls -R vendor
-    - mysql -u root -e "CREATE DATABASE dev;" && mysql -u root dev < /vendor/../mysql.sql
+    - mysql -u root -e "CREATE DATABASE dev;" && mysql -u root dev < vendor/pskuza/php_session/tests/mysql.sql
 script:
     - php php-cs-fixer.phar fix -v --dry-run --diff src
     - "./vendor/bin/phpunit"
