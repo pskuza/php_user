@@ -12,4 +12,24 @@ class user
     {
         $this->session = $session;
     }
+
+    public function login()
+    {
+
+    }
+
+    public function checklogin()
+    {
+
+    }
+
+    public function register(string $email, string $password)
+    {
+
+    }
+
+    public function logout()
+    {
+
+    }
 }

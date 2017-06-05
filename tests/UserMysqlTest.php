@@ -1,6 +1,5 @@
 <?php
 
-use php_session\session;
 use PHPUnit\Framework\TestCase;
 
 class UserMysqlTest extends TestCase
@@ -12,7 +11,5 @@ class UserMysqlTest extends TestCase
         //give php some time for the webserver
         sleep(5);
         $client = new GuzzleHttp\Client(['cookies' => true]);
-
-
     }
 }

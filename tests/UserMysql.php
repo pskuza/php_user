@@ -5,8 +5,6 @@ ini_set('display_errors', 1);
 
 require '../vendor/autoload.php';
 
-use php_user\user;
-
 $memcached = new Memcached();
 $memcached->addServer('127.0.0.1', 11211);
 
