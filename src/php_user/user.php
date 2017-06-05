@@ -4,13 +4,11 @@
 
 namespace php_user;
 
-use php_session\session;
-
 class user
 {
     protected $session = null;
 
-    public function __construct(php_session\session $session)
+    public function __construct(\php_session\session $session)
     {
         $this->session = $session;
     }
