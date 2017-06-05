@@ -13,6 +13,6 @@ class UserMysqlTest extends TestCase
         sleep(5);
         $client = new GuzzleHttp\Client(['cookies' => true]);
 
-        
+
     }
 }
