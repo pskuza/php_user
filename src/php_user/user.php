@@ -62,9 +62,7 @@ class user
             //decrypt it
             $parts = explode("|", $ciphertext);
 
-            $hash_compare = $this->decrypt($parts[1], $parts[0]);
-
-            var_dump($hash_compare);
+            $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
             return hash_equals($hash_compare, $hash);
         }
@@ -114,13 +112,13 @@ class user
 
         $hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
 
-        $iv = bin2hex(random_bytes(12));
+        $iv = random_bytes(12);
 
         $ciphertext = $this->encrypt($hash, $iv);
 
         return $this->db->insert('users', [
             'email'          => $email,
-            'password'        => $iv . "|" . $ciphertext,
+            'password'        => base64_encode($iv) . "|" . $ciphertext,
         ]);
     }
 
@@ -130,19 +128,19 @@ class user
 
     public function encrypt(string $plaintext, string $iv)
     {
-        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, hex2bin($iv), $plaintext, null);
+        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, $iv, $plaintext, null);
 
         //check if it did encrypt
 
-        return bin2hex($C);
+        return base64_encode($C);
     }
 
     public function decrypt(string $ciphertext, string $iv)
     {
-        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, hex2bin($iv), $ciphertext, null);
+        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, $iv, $ciphertext, null);
 
         //check if it did decrypt
 
-        return bin2hex($P);
+        return base64_encode($P);
     }
 }
