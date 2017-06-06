@@ -4,7 +4,7 @@
 [![StyleCI](https://styleci.io/repos/93275012/shield?branch=master)](https://styleci.io/repos/93275012)
 
 * Uses php_session for session management. (https://github.com/pskuza/php_session) 
-* to do
+* Uses bjeavons/zxcvbn-php to check for weak password (optional).
 
 
 ## Install
@@ -40,6 +40,6 @@ $session = new php_session\session($db, $cacheDriver);
 
 session_set_save_handler($session, true);
 
-$user = new php_user\user($session);
+$user = new php_user\user($session, $db);
 
 ```
