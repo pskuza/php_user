@@ -38,8 +38,37 @@ class user
 
     }
 
-    public function login()
+    public function login(string $email, string $password)
     {
+        //quick and simple hack so I know register works
+
+        if(empty($email)) {
+            //no email
+            return false;
+        }
+
+        if(empty($password) || !is_string($password)) {
+            //no password, or not string
+            return false;
+        }
+
+
+        $hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
+
+        if($ciphertext = $this->db->cell('SELECT password FROM users WHERE email = ?', $email)) {
+            //decrypt it
+            $parts = explode("|", $ciphertext);
+
+            $hash_compare = $this->decrypt($parts[1], $parts[0]);
+
+            var_dump($hash_compare);
+            var_dump($hash);
+
+            return hash_equals($hash_compare, $hash);
+        }
+
+        return false;
+
     }
 
     public function checklogin()
@@ -90,7 +119,7 @@ class user
 
         return $this->db->insert('users', [
             'email'          => $email,
-            'password'        => $iv . $ciphertext,
+            'password'        => $iv . "|" . $ciphertext,
         ]);
     }
 

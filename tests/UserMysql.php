@@ -36,4 +36,7 @@ switch ($_GET['tests']) {
     case 2:
         echo (int) $user->register('test@example.com', "03ae108840e45cac45a31820b8f12b99");
         break;
+    case 3:
+        echo (int) $user->login('test@example.com', "03ae108840e45cac45a31820b8f12b99");
+        break;
 }
