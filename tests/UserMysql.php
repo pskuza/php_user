@@ -23,15 +23,17 @@ session_set_save_handler($session, true);
 
 $user = new php_user\user($session, $db);
 
+$key = "d3c8846372b98298187a9a127e04551894d66e777250445e";
+
 
 switch ($_GET['tests']) {
     case 0:
-        echo (int) $user->register('invalid.email@', "03ae108840e45cac45a31820b8f12b99");
+        echo (int) $user->register('invalid.email@', "03ae108840e45cac45a31820b8f12b99", 1, $key);
         break;
     case 1:
-        echo (int) $user->register('test@example.com', "abc");
+        echo (int) $user->register('test@example.com', "abc", 1, $key);
         break;
     case 2:
-        echo (int) $user->register('test@example.com', "03ae108840e45cac45a31820b8f12b99");
+        echo (int) $user->register('test@example.com', "03ae108840e45cac45a31820b8f12b99", 1, $key);
         break;
 }
