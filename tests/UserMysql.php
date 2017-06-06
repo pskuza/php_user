@@ -23,15 +23,18 @@ session_set_save_handler($session, true);
 
 $user = new php_user\user($session, $db);
 
+//use openssl rand -hex 24 to generate a good random key for example
+$key = "69a2d11448886da4c2fd3f02fbded86fcf6e2295baad5b08";
+
 
 switch ($_GET['tests']) {
     case 0:
-        echo (int) $user->register('invalid.email@', "03ae108840e45cac45a31820b8f12b99");
+        echo (int) $user->register('invalid.email@', "03ae108840e45cac45a31820b8f12b99", 1, $key);
         break;
     case 1:
-        echo (int) $user->register('test@example.com', "abc");
+        echo (int) $user->register('test@example.com', "abc", 1, $key);
         break;
     case 2:
-        echo (int) $user->register('test@example.com', "03ae108840e45cac45a31820b8f12b99");
+        echo (int) $user->register('test@example.com', "03ae108840e45cac45a31820b8f12b99", 1, $key);
         break;
 }

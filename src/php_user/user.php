@@ -7,6 +7,7 @@ namespace php_user;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\RFCValidation;
 use ZxcvbnPhp\Zxcvbn;
+use AESGCM\AESGCM;
 
 class user
 {
@@ -16,6 +17,8 @@ class user
 
     protected $minimum_password_strength_zxcvbn;
 
+    protected $password_hash_options = ['cost' => 11];
+
     public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn = 1)
     {
         $this->session = $session;
@@ -23,6 +26,7 @@ class user
         $this->db = $db;
 
         $this->minimum_password_strength_zxcvbn = $minimum_password_strength_zxcvbn;
+
     }
 
     public function login()
@@ -42,8 +46,8 @@ class user
             return false;
         }
 
-        if(empty($password)) {
-            //no password
+        if(empty($password) || !is_string($password)) {
+            //no password, or not string
             return false;
         }
 
@@ -66,11 +70,44 @@ class user
             return false;
         }
 
-        //for now
-        return true;
+        //everything looks fine, register user
+
+        $hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
+
+        //generate key and iv
+        $iv = bin2hex(random_bytes(12));
+        $key = bin2hex(random_bytes(24));
+
+        $ciphertext = $this->encrypt($hash, $key, $iv);
+
+
+        return $this->db->insert('users', [
+            'email'          => $email,
+            'password'        => $ciphertext,
+            'key'   => $key,
+            'iv' => $iv,
+        ]);
     }
 
     public function logout()
     {
+    }
+
+    public function encrypt(string $plaintext, string $key, string $iv)
+    {
+        $C = \AESGCM::encryptAndAppendTag(hex2bin($key), hex2bin($iv), $plaintext, null);
+
+        //check if it did encrypt
+
+        return bin2hex($C);
+    }
+
+    public function decrypt(string $ciphertext, string $key, string $iv)
+    {
+        $P = \AESGCM::decryptWithAppendedTag(hex2bin($key), hex2bin($iv), $ciphertext, null);
+
+        //check if it did decrypt
+
+        return bin2hex($P);
     }
 }
