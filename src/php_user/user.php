@@ -26,6 +26,7 @@ class user
         $this->session = $session;
 
         $session->start();
+        $session->generate_csrf();
 
         $this->db = $db;
 
