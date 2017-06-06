@@ -90,7 +90,7 @@ class user
 
         return $this->db->insert('users', [
             'email'          => $email,
-            'password'        => hex2bin($iv . $ciphertext),
+            'password'        => $iv . $ciphertext,
         ]);
     }
 
