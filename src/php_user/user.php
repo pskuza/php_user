@@ -59,6 +59,7 @@ class user
             //decrypt it
             $parts = explode("|", $ciphertext);
 
+            var_dump($parts);
             $hash_compare = $this->decrypt($parts[1], $parts[0]);
 
             var_dump($hash_compare);
@@ -116,7 +117,7 @@ class user
 
         $ciphertext = $this->encrypt($hash, $iv);
 
-
+        var_dump($iv);
         return $this->db->insert('users', [
             'email'          => $email,
             'password'        => $iv . "|" . $ciphertext,
