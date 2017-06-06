@@ -21,4 +21,4 @@ $session = new php_session\session($db, $cacheDriver, 0, false, true);
 
 session_set_save_handler($session, true);
 
-$user = new php_user\user($session);
+$user = new php_user\user($session, $db);
