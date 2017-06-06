@@ -17,15 +17,23 @@ class user
 
     protected $minimum_password_strength_zxcvbn;
 
+    protected $encrypt_key;
+
     protected $password_hash_options = ['cost' => 11];
 
-    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn = 1)
+    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn = 1, string $encrypt_key)
     {
         $this->session = $session;
 
         $this->db = $db;
 
         $this->minimum_password_strength_zxcvbn = $minimum_password_strength_zxcvbn;
+
+        if(empty($encrypt_key) || strlen($encrypt_key) !== 48) {
+            throw new Exception('Invalid encryption key.');
+        }
+
+        $this->encrypt_key = hex2bin($encrypt_key);
 
     }
 
@@ -74,18 +82,14 @@ class user
 
         $hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
 
-        //generate key and iv
         $iv = bin2hex(random_bytes(12));
-        $key = bin2hex(random_bytes(24));
 
-        $ciphertext = $this->encrypt($hash, $key, $iv);
+        $ciphertext = $this->encrypt($hash, $iv);
 
 
         return $this->db->insert('users', [
             'email'          => $email,
-            'password'        => $ciphertext,
-            'key'   => $key,
-            'iv' => $iv,
+            'password'        => $iv . $ciphertext,
         ]);
     }
 
@@ -93,18 +97,18 @@ class user
     {
     }
 
-    public function encrypt(string $plaintext, string $key, string $iv)
+    public function encrypt(string $plaintext, string $iv)
     {
-        $C = \AESGCM\AESGCM::encryptAndAppendTag(hex2bin($key), hex2bin($iv), $plaintext, null);
+        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, hex2bin($iv), $plaintext, null);
 
         //check if it did encrypt
 
         return bin2hex($C);
     }
 
-    public function decrypt(string $ciphertext, string $key, string $iv)
+    public function decrypt(string $ciphertext, string $iv)
     {
-        $P = \AESGCM\AESGCM::decryptWithAppendedTag(hex2bin($key), hex2bin($iv), $ciphertext, null);
+        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, hex2bin($iv), $ciphertext, null);
 
         //check if it did decrypt
 
