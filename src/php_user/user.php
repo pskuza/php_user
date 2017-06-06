@@ -132,7 +132,7 @@ class user
 
     public function encrypt(string $plaintext, string $iv)
     {
-        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, hex2bin($iv), $plaintext, null);
+        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, hex2bin($iv), $plaintext, hex2bin('00'));
 
         //check if it did encrypt
 
@@ -141,7 +141,7 @@ class user
 
     public function decrypt(string $ciphertext, string $iv)
     {
-        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, hex2bin($iv), $ciphertext, null);
+        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, hex2bin($iv), $ciphertext, hex2bin('00'));
 
         //check if it did decrypt
 
