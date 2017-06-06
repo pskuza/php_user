@@ -4,7 +4,9 @@
 [![StyleCI](https://styleci.io/repos/93275012/shield?branch=master)](https://styleci.io/repos/93275012)
 
 * Uses php_session for session management. (https://github.com/pskuza/php_session) 
-* Uses bjeavons/zxcvbn-php to check for weak password (optional).
+* Checks for weak passwords. (https://github.com/bjeavons/zxcvbn-php) 
+* Encrypts the password_hash with AES-GCM. (https://github.com/Spomky-Labs/php-aes-gcm)
+* Forces a captcha on too many register/login attempts. (https://github.com/google/recaptcha)
 
 
 ## Install

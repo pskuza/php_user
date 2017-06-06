@@ -65,7 +65,6 @@ class user
             $hash_compare = $this->decrypt($parts[1], $parts[0]);
 
             var_dump($hash_compare);
-            var_dump($hash);
 
             return hash_equals($hash_compare, $hash);
         }
@@ -119,7 +118,6 @@ class user
 
         $ciphertext = $this->encrypt($hash, $iv);
 
-        var_dump($iv);
         return $this->db->insert('users', [
             'email'          => $email,
             'password'        => $iv . "|" . $ciphertext,
@@ -132,7 +130,7 @@ class user
 
     public function encrypt(string $plaintext, string $iv)
     {
-        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, hex2bin($iv), $plaintext, hex2bin('00'));
+        $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, hex2bin($iv), $plaintext, null);
 
         //check if it did encrypt
 
@@ -141,7 +139,7 @@ class user
 
     public function decrypt(string $ciphertext, string $iv)
     {
-        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, hex2bin($iv), $ciphertext, hex2bin('00'));
+        $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, hex2bin($iv), $ciphertext, null);
 
         //check if it did decrypt
 
