@@ -1,7 +1,7 @@
 CREATE TABLE `users` (
   `id`          INT(10) UNSIGNED AUTO_INCREMENT            NOT NULL,
   `email`        VARCHAR(128)                         NOT NULL,
-  `password`        VARBINARY(128)                         NOT NULL,
+  `password`        VARCHAR(256)                         NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `select` (`email`)
 )
