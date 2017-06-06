@@ -11,5 +11,17 @@ class UserMysqlTest extends TestCase
         //give php some time for the webserver
         sleep(5);
         $client = new GuzzleHttp\Client(['cookies' => true]);
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=0');
+
+        $this->assertEquals('0', $r->getBody()->getContents(), 'Invalid email was taken for registration.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=1');
+
+        $this->assertEquals('0', $r->getBody()->getContents(), 'Weak password was taken for registration.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=2');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not register with valid email and strong password.');
     }
 }

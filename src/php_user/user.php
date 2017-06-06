@@ -35,6 +35,8 @@ class user
 
     public function register(string $email, string $password)
     {
+        //to do: add messages to all falses
+
         if(empty($email)) {
             //no email
             return false;
@@ -63,6 +65,9 @@ class user
             // already taken
             return false;
         }
+
+        //for now
+        return true;
     }
 
     public function logout()
