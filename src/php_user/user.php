@@ -60,11 +60,11 @@ class user
 
         if($ciphertext = $this->db->cell('SELECT password FROM users WHERE email = ?', $email)) {
             //decrypt it
-            $parts = explode("|", $ciphertext);
+            //$parts = explode("|", $ciphertext);
 
-            $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
+            ///$hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
-            return hash_equals($hash_compare, $hash);
+            return hash_equals($ciphertext, $hash);
         }
 
         return false;
@@ -112,13 +112,13 @@ class user
 
         $hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
 
-        $iv = random_bytes(12);
+        //$iv = random_bytes(12);
 
-        $ciphertext = $this->encrypt($hash, $iv);
+        //$ciphertext = $this->encrypt($hash, $iv);
 
         return $this->db->insert('users', [
             'email'          => $email,
-            'password'        => base64_encode($iv) . "|" . $ciphertext,
+            'password'        => $hash,
         ]);
     }
 
