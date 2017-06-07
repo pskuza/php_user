@@ -10,7 +10,7 @@ CREATE TABLE `users` (
 
 CREATE TABLE `logins` (
   `sessions_id`          CHAR(64)            NOT NULL,
-  `users_id`          INT(10) UNSIGNED AUTO_INCREMENT            NOT NULL,
+  `users_id`          INT(10) UNSIGNED            NOT NULL,
   PRIMARY KEY (`sessions_id`),
   INDEX `login_select` (`users_id`),
   FOREIGN KEY (sessions_id) REFERENCES sessions(id),
