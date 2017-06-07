@@ -6,4 +6,15 @@ CREATE TABLE `users` (
   INDEX `select` (`email`)
 )
   ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
+  DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE `logins` (
+  `sessions_id`          CHAR(64)            NOT NULL,
+  `users_id`          INT(10) UNSIGNED AUTO_INCREMENT            NOT NULL,
+  PRIMARY KEY (`sessions_id`),
+  INDEX `login_select` (`users_id`),
+  FOREIGN KEY (sessions_id) REFERENCES sessions(id),
+  FOREIGN KEY (users_id) REFERENCES users(id)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
