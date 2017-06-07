@@ -138,8 +138,6 @@ class user
 
         //check if it did decrypt
 
-        var_dump($P);
-
         return $P;
     }
 }
