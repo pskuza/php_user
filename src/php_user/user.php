@@ -64,7 +64,7 @@ class user
 
             ///$hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
-            return password_verify($password, $hash);
+            return password_verify(base64_encode(\hash('sha384', $password, true)), $hash);
         }
 
         return false;
