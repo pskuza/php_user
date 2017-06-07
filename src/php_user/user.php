@@ -56,15 +56,15 @@ class user
         }
 
 
-        $hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
+        //$hash = \password_hash(base64_encode(\hash('sha384', $password, true)),PASSWORD_DEFAULT, $this->password_hash_options);
 
-        if($ciphertext = $this->db->cell('SELECT password FROM users WHERE email = ?', $email)) {
+        if($hash = $this->db->cell('SELECT password FROM users WHERE email = ?', $email)) {
             //decrypt it
             //$parts = explode("|", $ciphertext);
 
             ///$hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
-            return hash_equals($ciphertext, $hash);
+            return password_verify($password, $hash);
         }
 
         return false;
