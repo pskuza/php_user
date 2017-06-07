@@ -16,6 +16,5 @@ before_script:
 script:
     - php php-cs-fixer.phar fix -v --dry-run --diff src
     - "./vendor/bin/phpunit"
-    - cat tests/debug.txt
     - mysql -u root dev -e "Select * FROM sessions;"
     - mysql -u root dev -e "Select * FROM users;"
