@@ -61,7 +61,12 @@ class user
 
             $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
-            return password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare);
+            if (password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
+                return $this->db->insert('logins', [
+                    'sessions_id'          => session_id(),
+                    'users_id'        => $ciphertext['id'],
+                ]);
+            }
         }
 
         return false;
