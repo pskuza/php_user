@@ -50,6 +50,7 @@ class user
     {
         if ($this->checklogin()) {
             //already logged in
+
             return false;
         }
 
@@ -159,6 +160,7 @@ class user
         $this->db->delete('logins', [
             'sessions_id' => session_id(),
         ]);
+
         return $this->session->logout();
     }
 
