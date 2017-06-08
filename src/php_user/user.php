@@ -39,7 +39,8 @@ class user
         $this->encrypt_key = hex2bin($encrypt_key);
     }
 
-    public function setPasswordhash(array $options) {
+    public function setPasswordhash(array $options)
+    {
         if($this->password_hash_options !== $options) {
             $this->password_hash_options = $options;
         }
