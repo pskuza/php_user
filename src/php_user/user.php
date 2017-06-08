@@ -48,7 +48,7 @@ class user
 
     public function login(string $email, string $password)
     {
-        if($this->checklogin(session_id())) {
+        if ($this->checklogin()) {
             //already logged in
             return false;
         }
@@ -97,9 +97,9 @@ class user
         return false;
     }
 
-    public function checklogin(string $session_id)
+    public function checklogin()
     {
-        if ($this->db->cell('SELECT users_id FROM logins WHERE id = ?', $session_id)) {
+        if ($this->db->cell('SELECT users_id FROM logins WHERE sessions_id = ?', session_id())) {
             // already logged in
             return true;
         }
@@ -157,7 +157,7 @@ class user
     {
         //log the user out
         $this->db->delete('logins', [
-            'sessions_id' => session_id()
+            'sessions_id' => session_id(),
         ]);
         return $this->session->logout();
     }
