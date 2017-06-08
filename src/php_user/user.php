@@ -41,7 +41,7 @@ class user
 
     public function setPasswordhash(array $options)
     {
-        if($this->password_hash_options !== $options) {
+        if ($this->password_hash_options !== $options) {
             $this->password_hash_options = $options;
         }
     }
@@ -74,10 +74,10 @@ class user
 
                     $iv = random_bytes(12);
 
-                    $ciphertext = $this->encrypt($hash, $iv);
+                    $rehash_encrypted = $this->encrypt($hash, $iv);
 
                     $this->db->update('users', [
-                        'password' => base64_encode($iv).'|'.$ciphertext,
+                        'password' => base64_encode($iv).'|'.$rehash_encrypted,
                     ], [
                         'email' => $email,
                     ]);
