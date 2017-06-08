@@ -71,7 +71,9 @@ class user
 
             if (\password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
                 //regenerate session id
-                $this->session->regenerate_id();
+
+                //make this work later
+                //$this->session->regenerate_id();
 
                 //password was correct, check if we need to rehash the password (options changed)
                 if (\password_needs_rehash($hash_compare, PASSWORD_DEFAULT, $this->password_hash_options)) {
@@ -103,8 +105,10 @@ class user
     {
         if ($this->db->cell('SELECT users_id FROM logins WHERE sessions_id = ?', session_id())) {
             // already logged in
+
             return true;
         }
+        
         return false;
     }
 
