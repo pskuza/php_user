@@ -59,7 +59,23 @@ class user
 
             $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
-            if (password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
+            if (\password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
+
+                //password was correct, check if we need to rehash the password (options changed)
+                if (\password_needs_rehash($hash_compare, PASSWORD_DEFAULT, $this->password_hash_options)) {
+                    $hash = \password_hash(base64_encode(\hash('sha384', $password, true)), PASSWORD_DEFAULT, $this->password_hash_options);
+
+                    $iv = random_bytes(12);
+
+                    $ciphertext = $this->encrypt($hash, $iv);
+
+                    $this->db->update('users', [
+                        'password' => base64_encode($iv).'|'.$ciphertext
+                    ], [
+                        'email' => $email
+                    ]);
+                }
+
                 return $this->db->insert('logins', [
                     'sessions_id'          => session_id(),
                     'users_id'             => $ciphertext['id'],
