@@ -32,6 +32,10 @@ class UserMysqlTest extends TestCase
 
         $old_password = $r->getBody()->getContents();
 
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=6');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not log out the user.');
+
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=4');
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with changes hash options.');

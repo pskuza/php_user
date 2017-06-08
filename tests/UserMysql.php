@@ -45,4 +45,7 @@ switch ($_GET['tests']) {
     case 5:
         echo $db->cell('SELECT password FROM users WHERE id = ?', 1);
         break;
+    case 6:
+        echo (int) $user->logout();
+        break;
 }

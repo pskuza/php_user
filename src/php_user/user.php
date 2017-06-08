@@ -48,7 +48,10 @@ class user
 
     public function login(string $email, string $password)
     {
-        //quick and simple hack so I know register works
+        if($this->checklogin(session_id())) {
+            //already logged in
+            return false;
+        }
 
         if (empty($email)) {
             //no email
@@ -83,6 +86,7 @@ class user
                     ]);
                 }
 
+                //this will throw an exception should the record already exist (so we check at the top of login, if that session is already logged in...)
                 return $this->db->insert('logins', [
                     'sessions_id'          => session_id(),
                     'users_id'             => $ciphertext['id'],
@@ -93,8 +97,13 @@ class user
         return false;
     }
 
-    public function checklogin()
+    public function checklogin(string $session_id)
     {
+        if ($this->db->cell('SELECT users_id FROM logins WHERE id = ?', $session_id)) {
+            // already logged in
+            return true;
+        }
+        return false;
     }
 
     public function register(string $email, string $password)
@@ -146,6 +155,11 @@ class user
 
     public function logout()
     {
+        //log the user out
+        $this->db->delete('logins', [
+            'sessions_id' => session_id()
+        ]);
+        return $this->session->logout();
     }
 
     public function encrypt(string $plaintext, string $iv)
