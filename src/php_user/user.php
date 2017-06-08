@@ -39,6 +39,12 @@ class user
         $this->encrypt_key = hex2bin($encrypt_key);
     }
 
+    public function setPasswordhash(array $options) {
+        if($this->password_hash_options !== $options) {
+            $this->password_hash_options = $options;
+        }
+    }
+
     public function login(string $email, string $password)
     {
         //quick and simple hack so I know register works
@@ -70,9 +76,9 @@ class user
                     $ciphertext = $this->encrypt($hash, $iv);
 
                     $this->db->update('users', [
-                        'password' => base64_encode($iv).'|'.$ciphertext
+                        'password' => base64_encode($iv).'|'.$ciphertext,
                     ], [
-                        'email' => $email
+                        'email' => $email,
                     ]);
                 }
 

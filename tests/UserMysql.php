@@ -17,6 +17,12 @@ $db = \ParagonIE\EasyDB\Factory::create(
     ''
 );
 
+switch ($_GET['debug']) {
+    case 'getpassword':
+        echo $db->cell('SELECT password FROM users WHERE id = ?', 1);
+        die();
+}
+
 $session = new php_session\session($db, $cacheDriver, 0, false, true);
 
 session_set_save_handler($session, true);
@@ -36,6 +42,10 @@ switch ($_GET['tests']) {
         echo (int) $user->register('test@example.com', '03ae108840e45cac45a31820b8f12b99');
         break;
     case 3:
+        echo (int) $user->login('test@example.com', '03ae108840e45cac45a31820b8f12b99');
+        break;
+    case 4:
+        $user->setPasswordhash(['cost' => 12]);
         echo (int) $user->login('test@example.com', '03ae108840e45cac45a31820b8f12b99');
         break;
 }

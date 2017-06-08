@@ -27,5 +27,19 @@ class UserMysqlTest extends TestCase
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=3');
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with valid email and password.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?debug=getpassword');
+
+        $old_password = $r->getBody()->getContents();
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=4');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with changes hash options.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?debug=getpassword');
+
+        $new_password = $r->getBody()->getContents();
+
+        $this->assertNotEquals($old_password, $new_password, 'Rehash of password did not work.');
     }
 }
