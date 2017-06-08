@@ -50,7 +50,6 @@ class user
     {
         if ($this->checklogin()) {
             //already logged in
-
             return false;
         }
 
@@ -71,6 +70,8 @@ class user
             $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
             if (\password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
+                //regenerate session id
+                $this->session->regenerate_id();
 
                 //password was correct, check if we need to rehash the password (options changed)
                 if (\password_needs_rehash($hash_compare, PASSWORD_DEFAULT, $this->password_hash_options)) {
