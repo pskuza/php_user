@@ -48,4 +48,7 @@ switch ($_GET['tests']) {
     case 6:
         echo (int) $user->logout();
         break;
+    case 7:
+        echo (int) $user->checklogin();
+        break;
 }

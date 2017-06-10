@@ -101,10 +101,10 @@ class user
 
     public function checklogin()
     {
-        if ($this->db->cell('SELECT users_id FROM logins WHERE sessions_id = ?', session_id())) {
+        if ($user_id = $this->db->cell('SELECT users_id FROM logins WHERE sessions_id = ?', session_id())) {
             // already logged in
 
-            return true;
+            return $user_id;
         }
 
         return false;
