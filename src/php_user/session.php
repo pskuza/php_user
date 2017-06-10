@@ -2,7 +2,6 @@
 
 namespace php_user;
 
-
 class session extends \php_session\session
 {
     public function gc($max)

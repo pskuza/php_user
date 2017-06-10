@@ -7,6 +7,7 @@ namespace php_user;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\RFCValidation;
 use ZxcvbnPhp\Zxcvbn;
+use php_user\session;
 
 class user
 {
