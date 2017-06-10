@@ -157,6 +157,63 @@ class user
         ]);
     }
 
+    public function getEmail()
+    {
+        if ($email = $this->db->cell('SELECT email FROM users WHERE user_id = (SELECT users_id FROM logins WHERE sessions_id = ?)', session_id())) {
+            // already taken
+            return $email;
+        }
+        return false;
+    }
+
+    public function changePassword(string $old_password, string $new_password, string $email)
+    {
+        if (empty($old_password) || !is_string($old_password)) {
+            //no password, or not string
+            return false;
+        }
+
+        if (empty($new_password) || !is_string($new_password)) {
+            //no password, or not string
+            return false;
+        }
+
+        $zxcvbn = new Zxcvbn();
+        $strength = $zxcvbn->passwordStrength($new_password, [$email, $old_password]);
+        if ($strength['score'] <= $this->minimum_password_strength_zxcvbn) {
+            //too weak
+            return false;
+        }
+
+        if ($ciphertext = $this->db->row('SELECT id, password FROM users WHERE email = ?', $email)) {
+            //decrypt it
+            $parts = explode('|', $ciphertext['password']);
+
+            $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
+
+            if (\password_verify(base64_encode(\hash('sha384', $old_password, true)), $hash_compare)) {
+                //password was correct now write new password in
+                $hash = \password_hash(base64_encode(\hash('sha384', $new_password, true)), PASSWORD_DEFAULT, $this->password_hash_options);
+
+                $iv = random_bytes(12);
+
+                $ciphertext_new = $this->encrypt($hash, $iv);
+
+                $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new,], ['email' => $email]);
+
+                //delete all logins for this id
+
+                $this->db->delete('logins', [
+                    'users_id' => $ciphertext['id'],
+                ]);
+
+                return $this->logout();
+            }
+        }
+
+        return false;
+    }
+
     public function logout()
     {
         //log the user out

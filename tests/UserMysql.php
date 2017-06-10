@@ -51,4 +51,7 @@ switch ($_GET['tests']) {
     case 7:
         echo (int) $user->checklogin();
         break;
+    case 8:
+        echo (int) $user->changePassword('03ae108840e45cac45a31820b8f12b99', '31420b7f1239d', 'test@example.com');
+        break;
 }
