@@ -2,3 +2,4 @@
 /vendor/
 .DS_STORE
 composer.lock
+composer.phar
