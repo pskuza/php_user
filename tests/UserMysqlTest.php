@@ -37,7 +37,6 @@ class UserMysqlTest extends TestCase
         //i think the new cookie after logout does not get made before another request, lets check
         $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=1');
 
-
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not log out the user.');
 
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=4');

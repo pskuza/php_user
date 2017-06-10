@@ -71,8 +71,6 @@ class user
 
             if (\password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
                 //regenerate session id
-
-                //make this work later
                 $this->session->regenerate_id();
 
                 //password was correct, check if we need to rehash the password (options changed)
