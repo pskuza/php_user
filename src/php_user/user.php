@@ -199,7 +199,7 @@ class user
 
                 $ciphertext_new = $this->encrypt($hash, $iv);
 
-                $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new,], ['email' => $email]);
+                $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new], ['email' => $email]);
 
                 //delete all logins for this id
 
