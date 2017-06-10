@@ -43,7 +43,7 @@ switch ($_GET['tests']) {
         echo (int) $user->login('test@example.com', '03ae108840e45cac45a31820b8f12b99');
         break;
     case 5:
-        echo $db->cell('SELECT password FROM users WHERE id = ?', 1);
+        echo $db->cell('SELECT password FROM users WHERE email = ?', 'test@example.com');
         break;
     case 6:
         echo (int) $user->logout();

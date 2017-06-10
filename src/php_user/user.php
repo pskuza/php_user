@@ -70,10 +70,13 @@ class user
             $hash_compare = $this->decrypt(base64_decode($parts[1]), base64_decode($parts[0]));
 
             if (\password_verify(base64_encode(\hash('sha384', $password, true)), $hash_compare)) {
-                //regenerate session id
 
-                //make this work later
-                //$this->session->regenerate_id();
+                file_put_contents('debug.txt', session_id(). PHP_EOL, FILE_APPEND);
+                file_put_contents('debug.txt', shell_exec('mysql -u root dev -e "Select * FROM sessions;"'). PHP_EOL, FILE_APPEND);
+                //regenerate session id
+                $this->session->regenerate_id();
+                //file_put_contents('debug.txt', session_id(). PHP_EOL, FILE_APPEND);
+                //file_put_contents('debug.txt', shell_exec('mysql -u root dev -e "Select * FROM sessions;"'). PHP_EOL, FILE_APPEND);
 
                 //password was correct, check if we need to rehash the password (options changed)
                 if (\password_needs_rehash($hash_compare, PASSWORD_DEFAULT, $this->password_hash_options)) {
@@ -91,6 +94,8 @@ class user
                 }
 
                 //this will throw an exception should the record already exist (so we check at the top of login, if that session is already logged in...)
+                file_put_contents('debug.txt', session_id(). PHP_EOL, FILE_APPEND);
+                file_put_contents('debug.txt', shell_exec('mysql -u root dev -e "Select * FROM sessions;"') . PHP_EOL, FILE_APPEND);
                 return $this->db->insert('logins', [
                     'sessions_id'          => session_id(),
                     'users_id'             => $ciphertext['id'],
