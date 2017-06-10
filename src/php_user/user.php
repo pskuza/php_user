@@ -106,7 +106,7 @@ class user
 
             return true;
         }
-        
+
         return false;
     }
 
