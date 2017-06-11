@@ -19,3 +19,4 @@ script:
     - mysql -u root dev -e "Select * FROM sessions;"
     - mysql -u root dev -e "Select * FROM users;"
     - mysql -u root dev -e "Select * FROM logins;"
+    - mysql -u root dev -e "Select * FROM confirmation;"
