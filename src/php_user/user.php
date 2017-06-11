@@ -45,7 +45,7 @@ class user
         $this->encrypt_key = hex2bin($encrypt_key);
 
         if (!is_null($mail_settings)) {
-            $phpmailer = new \PHPMailer;
+            $phpmailer = new \PHPMailer();
             $phpmailer->isSMTP();
             $phpmailer->Host = $mail_settings['host'];
             $phpmailer->SMTPAuth = true;
@@ -230,7 +230,7 @@ class user
                 //send email if true
                 if ($notify_email) {
                     $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Your Password was changed.', [
-                            'pagetitle' => $this->email_header_subject . ' - Your Password was changed.',
+                            'pageTitle' => $this->email_header_subject . ' - Your Password was changed.',
                             'preview' => $this->email_header_subject . ' - Your Password was changed.',
                             'email' => $email,
                             'message' => 'Someone (hopefully you) changed your current password to your ' . $this->email_header_subject . ' account.',
@@ -282,13 +282,17 @@ class user
 
     public function sendEmail(string $file, string $email, string $subject, array $twig_text)
     {
+        $path_parts = pathinfo($file);
+
         $template = $this->twig->loadTemplate($file);
+        $template_text = $this->twig->loadTemplate($path_parts['filename'] . '_text.' . $path_parts['extension']);
 
         $this->phpmailer->addAddress($email);
         $this->phpmailer->isHTML(true);
 
         $this->phpmailer->Subject = $subject;
         $this->phpmailer->Body = $template->render($twig_text);
+        $this->phpmailer->AltBody = $template_text->render($twig_text);
 
         if ($this->phpmailer->send()) {
             return true;
