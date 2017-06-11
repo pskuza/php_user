@@ -26,7 +26,9 @@ class user
 
     protected $email_header_subject = 'php_user';
 
-    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings = null)
+    protected $confirm_email_url = 'https://example.com/confirm/';
+
+    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings)
     {
         $this->session = $session;
 
@@ -44,18 +46,16 @@ class user
 
         $this->encrypt_key = hex2bin($encrypt_key);
 
-        if (!is_null($mail_settings)) {
-            $phpmailer = new \PHPMailer();
-            $phpmailer->isSMTP();
-            $phpmailer->Host = $mail_settings['host'];
-            $phpmailer->SMTPAuth = true;
-            $phpmailer->Username = $mail_settings['username'];
-            $phpmailer->Password = $mail_settings['password'];
-            $phpmailer->SMTPSecure = $mail_settings['secure'];
-            $phpmailer->Port = $mail_settings['port'];
-            $phpmailer->setFrom($mail_settings['username']);
-            $this->phpmailer = $phpmailer;
-        }
+        $phpmailer = new \PHPMailer();
+        $phpmailer->isSMTP();
+        $phpmailer->Host = $mail_settings['host'];
+        $phpmailer->SMTPAuth = true;
+        $phpmailer->Username = $mail_settings['username'];
+        $phpmailer->Password = $mail_settings['password'];
+        $phpmailer->SMTPSecure = $mail_settings['secure'];
+        $phpmailer->Port = $mail_settings['port'];
+        $phpmailer->setFrom($mail_settings['username']);
+        $this->phpmailer = $phpmailer;
 
         $loader = new \Twig_Loader_Filesystem('../templates');
         $twig = new \Twig_Environment($loader);
@@ -87,7 +87,16 @@ class user
             return false;
         }
 
-        if ($ciphertext = $this->db->row('SELECT id, password FROM users WHERE email = ?', $email)) {
+        if ($ciphertext = $this->db->row('SELECT id, password, status FROM users WHERE email = ?', $email)) {
+            //check if status === 1
+            if($ciphertext['status'] === 0) {
+                //email not confirmed yet, show resend button
+                return false;
+            } elseif($ciphertext['status'] !== 1) {
+                //acc blocked, disabled or whatever
+                return false;
+            }
+
             //decrypt it
             $parts = explode('|', $ciphertext['password']);
 
@@ -175,9 +184,30 @@ class user
 
         $ciphertext = $this->encrypt($hash, $iv);
 
-        return $this->db->insert('users', [
+        $user_id = $this->db->insertGet('users', [
             'email'           => $email,
             'password'        => base64_encode($iv).'|'.$ciphertext,
+        ], 'id');
+
+        $token = bin2hex(random_bytes(24));
+
+        $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Confirm your mail address.', [
+            'pageTitle' => $this->email_header_subject . ' - Confirm your mail address.',
+            'preview' => $this->email_header_subject . ' - Confirm your mail address.',
+            'email' => $email,
+            'message' => 'You registered a ' . $this->email_header_subject . ' account. Please click the button or link below to confirm this address and enable your account.',
+            'button' => true,
+            'button_link' => $this->confirm_email_url . $token . '/' . urlencode($email),
+            'buttontext' => 'Confirm',
+            'message2' => 'Should you have difficulties enabling your account contact support.',
+            'small_help_message' => 'If the button does not work visit the following link: ' . $this->confirm_email_url . $token . '/' . urlencode($email),
+            'company' => 'php_user'
+        ]);
+
+        return $this->db->insert('confirmation', [
+            'users_id'           => $user_id,
+            'token'        => $token,
+            'timestamp' => time(),
         ]);
     }
 
@@ -292,6 +322,7 @@ class user
 
         $this->phpmailer->Subject = $subject;
         $this->phpmailer->Body = $template->render($twig_text);
+        unset($twig_text['small_help_message']);
         $this->phpmailer->AltBody = $template_text->render($twig_text);
 
         if ($this->phpmailer->send()) {
@@ -299,5 +330,9 @@ class user
         }
 
         return false;
+    }
+
+    public function confirmEmail(string $token, string $email)
+    {
     }
 }

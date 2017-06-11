@@ -24,6 +24,8 @@ class UserMysqlTest extends TestCase
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not register with valid email and strong password.');
 
+        die();
+
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=3');
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with valid email and password.');
