@@ -29,7 +29,25 @@ class UserMysqlTest extends TestCase
         $this->assertEquals('0', $r->getBody()->getContents(), 'Could login for a non confirmed account.');
 
         //confirm the account here .....
-        die();
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=10');
+
+        $confirmation_token = $r->getBody()->getContents();
+
+        $invalid_token = $confirmation_token;
+        $invalid_token[0] = "4";
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=11&token='.$invalid_token);
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could confirm account with invalid token.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=11&token='.$confirmation_token);
+
+        $this->assertEquals('0', $r->getBody()->getContents(), 'Could not confirm account with valid token.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=3');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with valid email and password.');
+
 
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=3');
 

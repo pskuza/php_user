@@ -59,4 +59,10 @@ switch ($_GET['tests']) {
     case 9:
         echo (int) $user->login('test@example.com', '31420b7f1239d');
         break;
+    case 10:
+        echo $db->cell('SELECT token FROM confirmation WHERE users_id = (SELECT id FROM users WHERE email = ?)', 'test@example.com');
+        break;
+    case 11:
+        echo (int) $user->confirmEmail($_GET['token'], 'test@example.com');
+        break;
 }

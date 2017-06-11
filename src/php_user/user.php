@@ -322,6 +322,7 @@ class user
 
         $this->phpmailer->Subject = $subject;
         $this->phpmailer->Body = $template->render($twig_text);
+        //remove the help message from plain text
         unset($twig_text['small_help_message']);
         $this->phpmailer->AltBody = $template_text->render($twig_text);
 
@@ -334,5 +335,34 @@ class user
 
     public function confirmEmail(string $token, string $email)
     {
+        //get token from email
+        if ($token_db = $this->db->cell('SELECT users_id, token, timestamp FROM confirmation WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
+            //check if the timestamp did not run out
+            if($token_db['timestamp'] <= time() - 10800) {
+                //delete
+                $this->db->delete('confirmation', [
+                    'users_id' => $token_db['users_id'],
+                ]);
+                return false;
+            }
+
+            if(hash_equals($token_db['token'], $token)) {
+                //delete the confirmation and set user status to 1
+
+                $this->db->update('users', [
+                    'status' => 1,
+                ], [
+                    'email' => $email,
+                ]);
+
+                $this->db->delete('confirmation', [
+                    'users_id' => $token_db['users_id'],
+                ]);
+                return true;
+            }
+        }
+
+        //token not found
+        return false;
     }
 }
