@@ -34,7 +34,7 @@ class UserMysqlTest extends TestCase
         $confirmation_token = $r->getBody()->getContents();
 
         $invalid_token = $confirmation_token;
-        $invalid_token[0] = "4";
+        $invalid_token[0] = "g";
 
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=11&token='.$invalid_token);
 

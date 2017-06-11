@@ -336,9 +336,9 @@ class user
     public function confirmEmail(string $token, string $email)
     {
         //get token from email
-        if ($token_db = $this->db->cell('SELECT users_id, token, timestamp FROM confirmation WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
+        if ($token_db = $this->db->row('SELECT users_id, token, timestamp FROM confirmation WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
             //check if the timestamp did not run out
-            if($token_db['timestamp'] <= time() - 10800) {
+            if ($token_db['timestamp'] <= time() - 10800) {
                 //delete
                 $this->db->delete('confirmation', [
                     'users_id' => $token_db['users_id'],
@@ -346,7 +346,7 @@ class user
                 return false;
             }
 
-            if(hash_equals($token_db['token'], $token)) {
+            if (hash_equals($token_db['token'], $token)) {
                 //delete the confirmation and set user status to 1
 
                 $this->db->update('users', [
