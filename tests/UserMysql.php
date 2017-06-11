@@ -6,6 +6,7 @@ ini_set('display_errors', 1);
 require '../vendor/autoload.php';
 
 $memcached = new Memcached();
+$memcached->setOption(Memcached::OPT_COMPRESSION, false);
 $memcached->addServer('127.0.0.1', 11211);
 
 $cacheDriver = new \Doctrine\Common\Cache\MemcachedCache();
