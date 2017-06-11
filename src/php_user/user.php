@@ -20,7 +20,13 @@ class user
 
     protected $password_hash_options = ['cost' => 11];
 
-    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key)
+    protected $phpmailer;
+
+    protected $twig;
+
+    protected $email_header_subject = 'php_user';
+
+    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings = null)
     {
         $this->session = $session;
 
@@ -37,6 +43,24 @@ class user
         }
 
         $this->encrypt_key = hex2bin($encrypt_key);
+
+        if(!is_null($mail_settings)) {
+            $phpmailer = new \PHPMailer;
+            $phpmailer->isSMTP();
+            $phpmailer->Host = $mail_settings['host'];
+            $phpmailer->SMTPAuth = true;
+            $phpmailer->Username = $mail_settings['username'];
+            $phpmailer->Password = $mail_settings['password'];
+            $phpmailer->SMTPSecure = $mail_settings['secure'];
+            $phpmailer->Port = $mail_settings['port'];
+            $phpmailer->setFrom($mail_settings['username']);
+            $this->phpmailer = $phpmailer;
+        }
+
+        $loader = new \Twig_Loader_Filesystem('../templates');
+        $twig = new \Twig_Environment($loader);
+
+        $this->twig = $twig;
     }
 
     public function setPasswordhash(array $options)
@@ -166,7 +190,7 @@ class user
         return false;
     }
 
-    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = false)
+    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = true)
     {
         if (empty($old_password) || !is_string($old_password)) {
             //no password, or not string
@@ -202,6 +226,20 @@ class user
                 $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new], ['email' => $email]);
 
                 //delete all logins for this id
+
+                //send email if true
+                if($notify_email) {
+                    $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Your Password was changed.', [
+                            'pagetitle' => $this->email_header_subject . ' - Your Password was changed.',
+                            'preview' => $this->email_header_subject . ' - Your Password was changed.',
+                            'email' => $email,
+                            'message' => 'Someone (hopefully you) changed your current password to your ' . $this->email_header_subject . ' account.',
+                            'button' => false,
+                            'message2' => 'Should you have difficulties accessing your account again contact support.',
+                            'small_help_message' => '',
+                            'company' => 'php_user'
+                    ]);
+                }
 
                 $this->db->delete('logins', [
                     'users_id' => $ciphertext['id'],
@@ -242,8 +280,20 @@ class user
         return $P;
     }
 
-    public function sendEmail(string $file, string $email, array $twig_text)
+    public function sendEmail(string $file, string $email, string $subject, array $twig_text)
     {
+        $template = $this->twig->loadTemplate($file);
 
+        $this->phpmailer->addAddress($email);
+        $this->phpmailer->isHTML(true);
+
+        $this->phpmailer->Subject = $subject;
+        $this->phpmailer->Body    = $template->render($twig_text);
+
+        if($this->phpmailer->send()) {
+            return true;
+        }
+
+        return false;
     }
 }
