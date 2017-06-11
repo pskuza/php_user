@@ -242,7 +242,7 @@ class user
         return $P;
     }
 
-    public function sendEmail(string $file, string $email)
+    public function sendEmail(string $file, string $email, array $twig_text)
     {
 
     }
