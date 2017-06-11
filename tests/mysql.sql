@@ -32,3 +32,14 @@ CREATE TABLE `confirmation` (
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
+DROP TABLE IF EXISTS `reset`;
+CREATE TABLE `reset` (
+  `users_id`          INT(10) UNSIGNED            NOT NULL,
+  `token`          CHAR(48)             NOT NULL,
+  `timestamp`   INT(10) UNSIGNED    NOT NULL,
+  PRIMARY KEY (`users_id`),
+  FOREIGN KEY (users_id) REFERENCES users(id)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;

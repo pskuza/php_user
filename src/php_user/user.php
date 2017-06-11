@@ -365,4 +365,43 @@ class user
         //token not found
         return false;
     }
+
+    public function requestResetPassword()
+    {
+    }
+
+    public function confirmResetPassword(string $token, string $email, string $new_password)
+    {
+        //get token from email
+        if ($token_db = $this->db->row('SELECT users_id, token, timestamp FROM reset WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
+            //check if the timestamp did not run out
+            if ($token_db['timestamp'] <= time() - 10800) {
+                //delete
+                $this->db->delete('reset', [
+                    'users_id' => $token_db['users_id'],
+                ]);
+                return false;
+            }
+
+            if (hash_equals($token_db['token'], $token)) {
+                //delete the confirmation and set user status to 1
+
+                $hash = \password_hash(base64_encode(\hash('sha384', $new_password, true)), PASSWORD_DEFAULT, $this->password_hash_options);
+
+                $iv = random_bytes(12);
+
+                $ciphertext_new = $this->encrypt($hash, $iv);
+
+                $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new], ['email' => $email]);
+
+                $this->db->delete('reset', [
+                    'users_id' => $token_db['users_id'],
+                ]);
+                return true;
+            }
+        }
+
+        //token not found
+        return false;
+    }
 }
