@@ -166,7 +166,7 @@ class user
         return false;
     }
 
-    public function changePassword(string $old_password, string $new_password, string $email)
+    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = false)
     {
         if (empty($old_password) || !is_string($old_password)) {
             //no password, or not string
@@ -240,5 +240,10 @@ class user
         //check if it did decrypt
 
         return $P;
+    }
+
+    public function sendEmail(string $file, string $email)
+    {
+
     }
 }
