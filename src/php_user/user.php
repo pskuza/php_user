@@ -89,10 +89,10 @@ class user
 
         if ($ciphertext = $this->db->row('SELECT id, password, status FROM users WHERE email = ?', $email)) {
             //check if status === 1
-            if($ciphertext['status'] === 0) {
+            if ($ciphertext['status'] === 0) {
                 //email not confirmed yet, show resend button
                 return false;
-            } elseif($ciphertext['status'] !== 1) {
+            } elseif ($ciphertext['status'] !== 1) {
                 //acc blocked, disabled or whatever
                 return false;
             }

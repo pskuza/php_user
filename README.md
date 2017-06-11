@@ -7,6 +7,8 @@
 * Checks for weak passwords. (https://github.com/bjeavons/zxcvbn-php) 
 * Encrypts the password_hash with AES-GCM. (https://github.com/Spomky-Labs/php-aes-gcm)
 * Forces a captcha on too many register/login attempts. (https://github.com/google/recaptcha)
+* Uses templates to send emails for confirmation & reset. (https://github.com/twigphp/Twig)
+* Uses PHPMailer for sending the actual emails. (https://github.com/PHPMailer/PHPMailer)
 
 
 ## Install
