@@ -44,7 +44,7 @@ class user
 
         $this->encrypt_key = hex2bin($encrypt_key);
 
-        if(!is_null($mail_settings)) {
+        if (!is_null($mail_settings)) {
             $phpmailer = new \PHPMailer;
             $phpmailer->isSMTP();
             $phpmailer->Host = $mail_settings['host'];
@@ -228,7 +228,7 @@ class user
                 //delete all logins for this id
 
                 //send email if true
-                if($notify_email) {
+                if ($notify_email) {
                     $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Your Password was changed.', [
                             'pagetitle' => $this->email_header_subject . ' - Your Password was changed.',
                             'preview' => $this->email_header_subject . ' - Your Password was changed.',
@@ -288,9 +288,9 @@ class user
         $this->phpmailer->isHTML(true);
 
         $this->phpmailer->Subject = $subject;
-        $this->phpmailer->Body    = $template->render($twig_text);
+        $this->phpmailer->Body = $template->render($twig_text);
 
-        if($this->phpmailer->send()) {
+        if ($this->phpmailer->send()) {
             return true;
         }
 
