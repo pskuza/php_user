@@ -131,6 +131,8 @@ class user
             } else {
                 $this->addBruteforce($email);
             }
+        } else {
+            $this->addBruteforce();
         }
 
         return false;
