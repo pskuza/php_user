@@ -494,7 +494,7 @@ class user
                 ]);
             }
         }
-        
+
         $this->db->run('INSERT INTO fail_ip (ip, timestamp) VALUES (INET6_ATON(?), UNIX_TIMESTAMP())', $_SERVER['REMOTE_ADDR']);
     }
 }
