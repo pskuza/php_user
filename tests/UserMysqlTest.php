@@ -85,5 +85,32 @@ class UserMysqlTest extends TestCase
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=9');
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with valid email and password after changePassword.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=13');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not request password reset.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=13');
+
+        $this->assertEquals('0', $r->getBody()->getContents(), 'Could request password reset for already existing reset.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=12');
+
+        $reset_token = $r->getBody()->getContents();
+
+        $invalid_reset_token = $reset_token;
+        $invalid_reset_token[0] = "g";
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=14&token='.$invalid_reset_token);
+
+        $this->assertEquals('0', $r->getBody()->getContents(), 'Could reset account password with invalid token.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=14&token='.$reset_token);
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not reset account password with valid token.');
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=15');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login after reset password.');
     }
 }

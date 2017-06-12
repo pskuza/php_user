@@ -28,6 +28,8 @@ class user
 
     protected $confirm_email_url = 'https://example.com/confirm/';
 
+    protected $reset_password_url = 'https://example.com/reset/';
+
     public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings)
     {
         $this->session = $session;
@@ -366,12 +368,59 @@ class user
         return false;
     }
 
-    public function requestResetPassword()
+    public function requestResetPassword(string $email)
     {
+        //check if the user exists and is not disabled
+        if ($user_id = $this->db->row('SELECT id, status FROM users WHERE email = ?', $email)) {
+            //check if status === 1
+            if ($user_id['status'] === 0) {
+                return false;
+            } elseif ($user_id['status'] !== 1) {
+                return false;
+            }
+            //check if a password request is not already in progress
+            if ($timestamp = $this->db->cell('SELECT timestamp FROM reset WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
+                if ($timestamp <= time() - 10800) {
+                    //delete
+                    $this->db->delete('reset', [
+                        'users_id' => $token_db['users_id'],
+                    ]);
+
+                    $token = bin2hex(random_bytes(24));
+                    $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
+                        'pageTitle' => $this->email_header_subject . ' - Password reset request.',
+                        'preview' => $this->email_header_subject . ' - Password reset request.',
+                        'email' => $email,
+                        'message' => 'Someone (hopefully you) requested to reset your ' . $this->email_header_subject . ' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
+                        'button_link' => $this->reset_password_url . $token . '/' . urlencode($email),
+                        'buttontext' => 'Reset',
+                        'message2' => 'Should you have difficulties enabling your account contact support.',
+                        'small_help_message' => 'If the button does not work visit the following link: ' . $this->reset_password_url . $token . '/' . urlencode($email),
+                        'company' => 'php_user'
+                    ]);
+
+                    return $this->db->insert('reset', [
+                        'users_id' => $user_id['id'],
+                        'token' => $token,
+                        'timestamp' => time(),
+                    ]);
+                }
+                //pasword request is in progress, maybe resend?
+            }
+        }
+
+        return false;
     }
 
     public function confirmResetPassword(string $token, string $email, string $new_password)
     {
+        $zxcvbn = new Zxcvbn();
+        $strength = $zxcvbn->passwordStrength($new_password, [$email]);
+        if ($strength['score'] <= $this->minimum_password_strength_zxcvbn) {
+            //too weak
+            return false;
+        }
+
         //get token from email
         if ($token_db = $this->db->row('SELECT users_id, token, timestamp FROM reset WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
             //check if the timestamp did not run out

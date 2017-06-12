@@ -66,4 +66,16 @@ switch ($_GET['tests']) {
     case 11:
         echo (int) $user->confirmEmail($_GET['token'], 'test@example.com');
         break;
+    case 12:
+        echo $db->cell('SELECT token FROM reset WHERE users_id = (SELECT id FROM users WHERE email = ?)', 'test@example.com');
+        break;
+    case 13:
+        echo (int) $user->requestResetPassword('test@example.com');
+        break;
+    case 14:
+        echo (int) $user->confirmResetPassword($_GET['token'], 'test@example.com', 'SomeNewSecurePassword');
+        break;
+    case 15:
+        echo (int) $user->login('test@example.com', 'SomeNewSecurePassword');
+        break;
 }
