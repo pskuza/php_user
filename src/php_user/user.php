@@ -128,6 +128,8 @@ class user
                     'sessions_id'          => session_id(),
                     'users_id'             => $ciphertext['id'],
                 ]);
+            } else {
+                $this->addBruteforce($email);
             }
         }
 
@@ -476,13 +478,26 @@ class user
         return false;
     }
 
-    public function checkBruteforce(int $user_id, string $ip)
+    public function checkBruteforce(string $ip, string $email)
     {
-        //returns a true or false depending on if the ip (or user) did too many failed requests and we should show a captcha
+        //returns a true or false depending on if the ip (or user) did too many failed requests in the last hour and we should show a captcha
     }
 
-    public function addBruteforce(int $user_id, string $ip)
+    public function addBruteforce(string $email = null)
     {
         //add a row for user (if set) and ip into db
+        if(!is_null($email)) {
+            if ($users_id = $this->db->cell('SELECT id FROM users WHERE email = ?', $email)) {
+                $this->db->insert('fail_users', [
+                    'users_id' => $users_id(),
+                    'timestamp' => time(),
+                ]);
+            }
+        }
+
+        $this->db->insert('fail_ip', [
+            'ip' => "INET6_ATON(".$_SERVER['REMOTE_ADDR'].")",
+            'timestamp' => time(),
+        ]);
     }
 }
