@@ -386,6 +386,7 @@ class user
                         'users_id' => $token_db['users_id'],
                     ]);
 
+                    //resend new since old one is invalid
                     $token = bin2hex(random_bytes(24));
                     $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
                         'pageTitle' => $this->email_header_subject . ' - Password reset request.',
@@ -407,6 +408,25 @@ class user
                 }
                 //pasword request is in progress, maybe resend?
             }
+
+            $token = bin2hex(random_bytes(24));
+            $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
+                'pageTitle' => $this->email_header_subject . ' - Password reset request.',
+                'preview' => $this->email_header_subject . ' - Password reset request.',
+                'email' => $email,
+                'message' => 'Someone (hopefully you) requested to reset your ' . $this->email_header_subject . ' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
+                'button_link' => $this->reset_password_url . $token . '/' . urlencode($email),
+                'buttontext' => 'Reset',
+                'message2' => 'Should you have difficulties enabling your account contact support.',
+                'small_help_message' => 'If the button does not work visit the following link: ' . $this->reset_password_url . $token . '/' . urlencode($email),
+                'company' => 'php_user'
+            ]);
+
+            return $this->db->insert('reset', [
+                'users_id' => $user_id['id'],
+                'token' => $token,
+                'timestamp' => time(),
+            ]);
         }
 
         return false;
