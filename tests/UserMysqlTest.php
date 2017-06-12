@@ -86,6 +86,10 @@ class UserMysqlTest extends TestCase
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login with valid email and password after changePassword.');
 
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=6');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Could not log out the user.');
+
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=13');
 
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not request password reset.');

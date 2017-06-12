@@ -409,7 +409,6 @@ class user
                 }
                 //pasword request is in progress, maybe resend?
             } else {
-
                 $token = bin2hex(random_bytes(24));
                 $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
                     'pageTitle' => $this->email_header_subject . ' - Password reset request.',
