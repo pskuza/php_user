@@ -486,10 +486,10 @@ class user
     public function addBruteforce(string $email = null)
     {
         //add a row for user (if set) and ip into db
-        if(!is_null($email)) {
+        if (!is_null($email)) {
             if ($users_id = $this->db->cell('SELECT id FROM users WHERE email = ?', $email)) {
                 $this->db->insert('fail_users', [
-                    'users_id' => $users_id(),
+                    'users_id' => $users_id,
                     'timestamp' => time(),
                 ]);
             }
