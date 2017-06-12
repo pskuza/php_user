@@ -475,4 +475,14 @@ class user
         //token not found
         return false;
     }
+
+    public function checkBruteforce(int $user_id, string $ip)
+    {
+        //returns a true or false depending on if the ip (or user) did too many failed requests and we should show a captcha
+    }
+
+    public function addBruteforce(int $user_id, string $ip)
+    {
+        //add a row for user (if set) and ip into db
+    }
 }

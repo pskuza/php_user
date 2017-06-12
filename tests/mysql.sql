@@ -43,3 +43,26 @@ CREATE TABLE `reset` (
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
+DROP TABLE IF EXISTS `fail_users`;
+CREATE TABLE `fail_users` (
+  `id`          INT(10) UNSIGNED  AUTO_INCREMENT,
+  `users_id`          INT(10) UNSIGNED    NOT NULL,
+  `timestamp`   INT(10) UNSIGNED    NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fail_select` (`users_id`),
+  FOREIGN KEY (users_id) REFERENCES users(id)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
+DROP TABLE IF EXISTS `fail_ip`;
+CREATE TABLE `fail_ip_ipv4` (
+  `id`          INT(10) UNSIGNED  AUTO_INCREMENT,
+  `ip`          VARBINARY(16) NOT NULL,
+  `timestamp`   INT(10) UNSIGNED    NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fail_select` (`ip`)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
