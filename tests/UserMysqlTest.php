@@ -118,9 +118,16 @@ class UserMysqlTest extends TestCase
         $this->assertEquals('1', $r->getBody()->getContents(), 'Could not login after reset password.');
 
         $i = 0;
-        while ($i <= 10) {
+        while ($i < 10) {
             //make failed logins with valid email and wrong password
             $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=9');
+            $i++;
+        }
+
+        $i = 0;
+        while ($i < 10) {
+            //make failed logins with valid email and wrong password
+            $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=16');
             $i++;
         }
     }

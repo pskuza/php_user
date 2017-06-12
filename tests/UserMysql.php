@@ -78,4 +78,7 @@ switch ($_GET['tests']) {
     case 15:
         echo (int) $user->login('test@example.com', 'SomeNewSecurePassword');
         break;
+    case 16:
+        echo (int) $user->login('nosuchemail@example.com', '31420b7f1239d');
+        break;
 }
