@@ -57,7 +57,7 @@ CREATE TABLE `fail_users` (
   DEFAULT CHARSET = utf8mb4;
 
 DROP TABLE IF EXISTS `fail_ip`;
-CREATE TABLE `fail_ip_ipv4` (
+CREATE TABLE `fail_ip` (
   `id`          INT(10) UNSIGNED  AUTO_INCREMENT,
   `ip`          VARBINARY(16) NOT NULL,
   `timestamp`   INT(10) UNSIGNED    NOT NULL,
