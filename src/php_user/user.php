@@ -394,11 +394,11 @@ class user
                 return false;
             }
             //check if a password request is not already in progress
-            if ($timestamp = $this->db->cell('SELECT timestamp FROM reset WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
+            if ($timestamp = $this->db->cell('SELECT timestamp FROM reset WHERE users_id = ?', $user_id['id'])) {
                 if ($timestamp <= time() - 10800) {
                     //delete
                     $this->db->delete('reset', [
-                        'users_id' => $token_db['users_id'],
+                        'users_id' => $user_id['id'],
                     ]);
 
                     //resend new since old one is invalid
