@@ -283,7 +283,11 @@ class user
                 ]);
 
                 return $this->logout();
+            } else {
+                $this->addBruteforce($email);
             }
+        } else {
+            $this->addBruteforce();
         }
 
         return false;
@@ -368,7 +372,11 @@ class user
                 ]);
 
                 return true;
+            } else {
+                $this->addBruteforce($email);
             }
+        } else {
+            $this->addBruteforce();
         }
 
         //token not found
@@ -436,6 +444,8 @@ class user
                     'timestamp' => time(),
                 ]);
             }
+        } else {
+            $this->addBruteforce();
         }
 
         return false;
@@ -478,7 +488,11 @@ class user
                 ]);
 
                 return true;
+            } else {
+                $this->addBruteforce($email);
             }
+        } else {
+            $this->addBruteforce();
         }
 
         //token not found
@@ -496,7 +510,7 @@ class user
             }
         }
         if ($fi_count = $this->db->cell('SELECT COUNT(id) FROM fail_ip WHERE ip = INET6_ATON(?)', $_SERVER['REMOTE_ADDR'])) {
-            if ($fi_count > 10) {
+            if ($fi_count > 20) {
                 return true;
             }
         }
