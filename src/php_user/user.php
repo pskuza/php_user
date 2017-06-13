@@ -480,9 +480,23 @@ class user
         return false;
     }
 
-    public function checkBruteforce(string $ip, string $email)
+    public function checkBruteforce(string $email = null)
     {
         //returns a true or false depending on if the ip (or user) did too many failed requests in the last hour and we should show a captcha
+        if (!is_null($email)) {
+            if ($fu_count = $this->db->cell('SELECT COUNT(id) FROM fail_users WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
+                if($fu_count > 10) {
+                    return true;
+                }
+            }
+        }
+        if ($fi_count = $this->db->cell('SELECT COUNT(id) FROM fail_ip WHERE ip = INET6_ATON(?)', $_SERVER['REMOTE_ADDR'])) {
+            if($fi_count > 10) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function addBruteforce(string $email = null)

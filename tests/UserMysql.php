@@ -81,4 +81,10 @@ switch ($_GET['tests']) {
     case 16:
         echo (int) $user->login('nosuchemail@example.com', '31420b7f1239d');
         break;
+    case 17:
+        echo (int) $user->checkBruteforce('test@example.com');
+        break;
+    case 18:
+        echo (int) $user->checkBruteforce();
+        break;
 }

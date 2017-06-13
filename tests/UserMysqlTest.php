@@ -126,11 +126,19 @@ class UserMysqlTest extends TestCase
             $i++;
         }
 
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=17');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Bruteforcecheck for user did not work.');
+
         $i = 0;
         while ($i < 10) {
             //make failed logins with valid email and wrong password
             $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=16');
             $i++;
         }
+
+        $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=18');
+
+        $this->assertEquals('1', $r->getBody()->getContents(), 'Bruteforcecheck for ip did not work.');
     }
 }
