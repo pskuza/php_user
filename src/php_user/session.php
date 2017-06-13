@@ -21,8 +21,8 @@ class session extends \php_session\session
         }
         $now = time() - 3600;
         //delete failed attempts older than 1 hour
-        $this->db->run('DELETE fail_ip WHERE timestamp > ?', $now);
-        $this->db->run('DELETE fail_users WHERE timestamp > ?', $now);
+        $this->db->run('DELETE FROM fail_ip WHERE timestamp > ?', $now);
+        $this->db->run('DELETE FROM fail_users WHERE timestamp > ?', $now);
         $this->db->commit();
 
         return true;
