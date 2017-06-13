@@ -34,7 +34,7 @@ class UserMysqlTest extends TestCase
         $confirmation_token = $r->getBody()->getContents();
 
         $invalid_token = $confirmation_token;
-        $invalid_token[0] = "g";
+        $invalid_token[0] = 'g';
 
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=11&token='.$invalid_token);
 
@@ -103,7 +103,7 @@ class UserMysqlTest extends TestCase
         $reset_token = $r->getBody()->getContents();
 
         $invalid_reset_token = $reset_token;
-        $invalid_reset_token[0] = "g";
+        $invalid_reset_token[0] = 'g';
 
         $r = $client->request('GET', 'http://127.0.0.1:8080/UserMysql.php?tests=14&token='.$invalid_reset_token);
 

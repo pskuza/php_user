@@ -197,23 +197,23 @@ class user
 
         $token = bin2hex(random_bytes(24));
 
-        $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Confirm your mail address.', [
-            'pageTitle' => $this->email_header_subject . ' - Confirm your mail address.',
-            'preview' => $this->email_header_subject . ' - Confirm your mail address.',
-            'email' => $email,
-            'message' => 'You registered a ' . $this->email_header_subject . ' account. Please click the button or link below to confirm this address and enable your account.',
-            'button' => true,
-            'button_link' => $this->confirm_email_url . $token . '/' . urlencode($email),
-            'buttontext' => 'Confirm',
-            'message2' => 'Should you have difficulties enabling your account contact support.',
-            'small_help_message' => 'If the button does not work visit the following link: ' . $this->confirm_email_url . $token . '/' . urlencode($email),
-            'company' => 'php_user'
+        $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Confirm your mail address.', [
+            'pageTitle'          => $this->email_header_subject.' - Confirm your mail address.',
+            'preview'            => $this->email_header_subject.' - Confirm your mail address.',
+            'email'              => $email,
+            'message'            => 'You registered a '.$this->email_header_subject.' account. Please click the button or link below to confirm this address and enable your account.',
+            'button'             => true,
+            'button_link'        => $this->confirm_email_url.$token.'/'.urlencode($email),
+            'buttontext'         => 'Confirm',
+            'message2'           => 'Should you have difficulties enabling your account contact support.',
+            'small_help_message' => 'If the button does not work visit the following link: '.$this->confirm_email_url.$token.'/'.urlencode($email),
+            'company'            => 'php_user',
         ]);
 
         return $this->db->insert('confirmation', [
             'users_id'           => $user_id,
-            'token'        => $token,
-            'timestamp' => time(),
+            'token'              => $token,
+            'timestamp'          => time(),
         ]);
     }
 
@@ -223,6 +223,7 @@ class user
             // already taken
             return $email;
         }
+
         return false;
     }
 
@@ -265,15 +266,15 @@ class user
 
                 //send email if true
                 if ($notify_email) {
-                    $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Your Password was changed.', [
-                            'pageTitle' => $this->email_header_subject . ' - Your Password was changed.',
-                            'preview' => $this->email_header_subject . ' - Your Password was changed.',
-                            'email' => $email,
-                            'message' => 'Someone (hopefully you) changed your current password to your ' . $this->email_header_subject . ' account.',
-                            'button' => false,
-                            'message2' => 'Should you have difficulties accessing your account again contact support.',
+                    $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Your Password was changed.', [
+                            'pageTitle'          => $this->email_header_subject.' - Your Password was changed.',
+                            'preview'            => $this->email_header_subject.' - Your Password was changed.',
+                            'email'              => $email,
+                            'message'            => 'Someone (hopefully you) changed your current password to your '.$this->email_header_subject.' account.',
+                            'button'             => false,
+                            'message2'           => 'Should you have difficulties accessing your account again contact support.',
                             'small_help_message' => '',
-                            'company' => 'php_user'
+                            'company'            => 'php_user',
                     ]);
                 }
 
@@ -321,7 +322,7 @@ class user
         $path_parts = pathinfo($file);
 
         $template = $this->twig->loadTemplate($file);
-        $template_text = $this->twig->loadTemplate($path_parts['filename'] . '_text.' . $path_parts['extension']);
+        $template_text = $this->twig->loadTemplate($path_parts['filename'].'_text.'.$path_parts['extension']);
 
         $this->phpmailer->addAddress($email);
         $this->phpmailer->isHTML(true);
@@ -349,6 +350,7 @@ class user
                 $this->db->delete('confirmation', [
                     'users_id' => $token_db['users_id'],
                 ]);
+
                 return false;
             }
 
@@ -364,6 +366,7 @@ class user
                 $this->db->delete('confirmation', [
                     'users_id' => $token_db['users_id'],
                 ]);
+
                 return true;
             }
         }
@@ -392,44 +395,44 @@ class user
 
                     //resend new since old one is invalid
                     $token = bin2hex(random_bytes(24));
-                    $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
-                        'pageTitle' => $this->email_header_subject . ' - Password reset request.',
-                        'preview' => $this->email_header_subject . ' - Password reset request.',
-                        'email' => $email,
-                        'message' => 'Someone (hopefully you) requested to reset your ' . $this->email_header_subject . ' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
-                        'button' => true,
-                        'button_link' => $this->reset_password_url . $token . '/' . urlencode($email),
-                        'buttontext' => 'Reset',
-                        'message2' => 'Should you have difficulties enabling your account contact support.',
-                        'small_help_message' => 'If the button does not work visit the following link: ' . $this->reset_password_url . $token . '/' . urlencode($email),
-                        'company' => 'php_user'
+                    $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Password reset request.', [
+                        'pageTitle'          => $this->email_header_subject.' - Password reset request.',
+                        'preview'            => $this->email_header_subject.' - Password reset request.',
+                        'email'              => $email,
+                        'message'            => 'Someone (hopefully you) requested to reset your '.$this->email_header_subject.' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
+                        'button'             => true,
+                        'button_link'        => $this->reset_password_url.$token.'/'.urlencode($email),
+                        'buttontext'         => 'Reset',
+                        'message2'           => 'Should you have difficulties enabling your account contact support.',
+                        'small_help_message' => 'If the button does not work visit the following link: '.$this->reset_password_url.$token.'/'.urlencode($email),
+                        'company'            => 'php_user',
                     ]);
 
                     return $this->db->insert('reset', [
-                        'users_id' => $user_id['id'],
-                        'token' => $token,
+                        'users_id'  => $user_id['id'],
+                        'token'     => $token,
                         'timestamp' => time(),
                     ]);
                 }
                 //pasword request is in progress, maybe resend?
             } else {
                 $token = bin2hex(random_bytes(24));
-                $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
-                    'pageTitle' => $this->email_header_subject . ' - Password reset request.',
-                    'preview' => $this->email_header_subject . ' - Password reset request.',
-                    'email' => $email,
-                    'message' => 'Someone (hopefully you) requested to reset your ' . $this->email_header_subject . ' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
-                    'button' => true,
-                    'button_link' => $this->reset_password_url . $token . '/' . urlencode($email),
-                    'buttontext' => 'Reset',
-                    'message2' => 'Should you have difficulties enabling your account contact support.',
-                    'small_help_message' => 'If the button does not work visit the following link: ' . $this->reset_password_url . $token . '/' . urlencode($email),
-                    'company' => 'php_user'
+                $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Password reset request.', [
+                    'pageTitle'          => $this->email_header_subject.' - Password reset request.',
+                    'preview'            => $this->email_header_subject.' - Password reset request.',
+                    'email'              => $email,
+                    'message'            => 'Someone (hopefully you) requested to reset your '.$this->email_header_subject.' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
+                    'button'             => true,
+                    'button_link'        => $this->reset_password_url.$token.'/'.urlencode($email),
+                    'buttontext'         => 'Reset',
+                    'message2'           => 'Should you have difficulties enabling your account contact support.',
+                    'small_help_message' => 'If the button does not work visit the following link: '.$this->reset_password_url.$token.'/'.urlencode($email),
+                    'company'            => 'php_user',
                 ]);
 
                 return $this->db->insert('reset', [
-                    'users_id' => $user_id['id'],
-                    'token' => $token,
+                    'users_id'  => $user_id['id'],
+                    'token'     => $token,
                     'timestamp' => time(),
                 ]);
             }
@@ -455,6 +458,7 @@ class user
                 $this->db->delete('reset', [
                     'users_id' => $token_db['users_id'],
                 ]);
+
                 return false;
             }
 
@@ -472,6 +476,7 @@ class user
                 $this->db->delete('reset', [
                     'users_id' => $token_db['users_id'],
                 ]);
+
                 return true;
             }
         }
@@ -485,13 +490,13 @@ class user
         //returns a true or false depending on if the ip (or user) did too many failed requests in the last hour and we should show a captcha
         if (!is_null($email)) {
             if ($fu_count = $this->db->cell('SELECT COUNT(id) FROM fail_users WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
-                if($fu_count > 10) {
+                if ($fu_count > 10) {
                     return true;
                 }
             }
         }
         if ($fi_count = $this->db->cell('SELECT COUNT(id) FROM fail_ip WHERE ip = INET6_ATON(?)', $_SERVER['REMOTE_ADDR'])) {
-            if($fi_count > 10) {
+            if ($fi_count > 10) {
                 return true;
             }
         }
@@ -505,7 +510,7 @@ class user
         if (!is_null($email)) {
             if ($users_id = $this->db->cell('SELECT id FROM users WHERE email = ?', $email)) {
                 $this->db->insert('fail_users', [
-                    'users_id' => $users_id,
+                    'users_id'  => $users_id,
                     'timestamp' => time(),
                 ]);
             }
