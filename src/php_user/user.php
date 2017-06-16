@@ -30,7 +30,7 @@ class user
 
     protected $reset_password_url = 'https://example.com/reset/';
 
-    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings)
+    public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings, string $twig_template_dir)
     {
         $this->session = $session;
 
@@ -59,7 +59,7 @@ class user
         $phpmailer->setFrom($mail_settings['username']);
         $this->phpmailer = $phpmailer;
 
-        $loader = new \Twig_Loader_Filesystem('../templates');
+        $loader = new \Twig_Loader_Filesystem($twig_template_dir);
         $twig = new \Twig_Environment($loader);
 
         $this->twig = $twig;
