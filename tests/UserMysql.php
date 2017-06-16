@@ -26,7 +26,7 @@ $key = 'd3c8846372b98298187a9a127e04551894d66e777250445e';
 
 $email_settings = ['host' => 'smtp.mailtrap.io', 'username' => 'b35483ce4181bf', 'password' => '26a55050943989', 'port' => 465, 'secure' => 'tls'];
 
-$user = new php_user\user($session, $db, 1, $key, $email_settings);
+$user = new php_user\user($session, $db, 1, $key, $email_settings, "../templates");
 
 switch ($_GET['tests']) {
     case 0:
