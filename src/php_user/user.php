@@ -508,7 +508,7 @@ class user
                 }
             }
         }
-        if ($fi_count = $this->db->cell('SELECT COUNT(id) FROM fail_ip WHERE ip = INET6_ATON(?)', $_SERVER['REMOTE_ADDR'])) {
+        if ($fi_count = $this->db->cell('SELECT COUNT(id) FROM fail_ip WHERE ip = ?', inet_pton($_SERVER['REMOTE_ADDR']))) {
             if ($fi_count > 20) {
                 return true;
             }
