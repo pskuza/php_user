@@ -209,7 +209,7 @@ class user
             'company'            => 'php_user',
         ]);
 
-        return $this->db->insert('confirmation', [
+        return (bool) $this->db->insert('confirmation', [
             'users_id'           => $user_id,
             'token'              => $token,
             'timestamp'          => time(),

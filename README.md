@@ -46,4 +46,6 @@ session_set_save_handler($session, true);
 
 $user = new php_user\user($session, $db);
 
+//for more up to date usage see tests/UserMysql.php
+
 ```
