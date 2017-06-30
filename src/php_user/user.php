@@ -437,7 +437,7 @@ class user
                     'company'            => 'php_user',
                 ]);
 
-                return $this->db->insert('reset', [
+                return (bool) $this->db->insert('reset', [
                     'users_id'  => $user_id['id'],
                     'token'     => $token,
                     'timestamp' => time(),
