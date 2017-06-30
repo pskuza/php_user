@@ -43,7 +43,6 @@ class user
 
         if (empty($encrypt_key) || strlen($encrypt_key) !== 48) {
             throw new Exception('Invalid encryption key.');
-            die();
         }
 
         $this->encrypt_key = hex2bin($encrypt_key);

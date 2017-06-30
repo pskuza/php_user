@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace php_user;
 
 class session extends \php_session\session
 {
     //override the gc function from php_session to make it delete logins entries before deleting sessions
-    public function gc($max)
+    public function gc($max) : bool
     {
         $rows = $this->db->run('SELECT id FROM sessions WHERE timestamp < ? AND remember_me = 0', time() - intval($max));
         $this->db->beginTransaction();
