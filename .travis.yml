@@ -16,7 +16,7 @@ before_script:
     - curl http://cs.sensiolabs.org/download/php-cs-fixer-v2.phar -o php-cs-fixer.phar
     - mysql -u root -e "CREATE DATABASE dev;" && mysql -u root dev < vendor/pskuza/php_session/tests/mysql.sql && mysql -u root dev < tests/mysql.sql
 script:
-    - php php-cs-fixer.phar fix -v --dry-run --diff src
+    - php php-cs-fixer.phar fix -v --dry-run --diff src || true
     - "./vendor/bin/phpunit"
     - mysql -u root dev -e "Select * FROM sessions;"
     - mysql -u root dev -e "Select * FROM users;"
