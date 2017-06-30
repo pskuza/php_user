@@ -1,6 +1,6 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
 namespace php_user;
 
@@ -71,7 +71,7 @@ class user
         }
     }
 
-    public function login(string $email, string $password)
+    public function login(string $email, string $password) : bool
     {
         if ($this->checklogin()) {
             //already logged in
@@ -137,7 +137,7 @@ class user
         return false;
     }
 
-    public function checklogin()
+    public function checklogin() : int
     {
         if ($user_id = $this->db->cell('SELECT users_id FROM logins WHERE sessions_id = ?', session_id())) {
             // already logged in
@@ -145,10 +145,10 @@ class user
             return $user_id;
         }
 
-        return false;
+        return 0;
     }
 
-    public function register(string $email, string $password)
+    public function register(string $email, string $password) : bool
     {
         //to do: add messages to all falses
 
@@ -216,17 +216,17 @@ class user
         ]);
     }
 
-    public function getEmail()
+    public function getEmail() : string
     {
         if ($email = $this->db->cell('SELECT email FROM users WHERE user_id = (SELECT users_id FROM logins WHERE sessions_id = ?)', session_id())) {
             // already taken
             return $email;
         }
 
-        return false;
+        return '';
     }
 
-    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = true)
+    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = true) : bool
     {
         if (empty($old_password) || !is_string($old_password)) {
             //no password, or not string
@@ -292,7 +292,7 @@ class user
         return false;
     }
 
-    public function logout()
+    public function logout() : bool
     {
         //log the user out
         $this->db->delete('logins', [
@@ -302,7 +302,7 @@ class user
         return $this->session->logout();
     }
 
-    public function encrypt(string $plaintext, string $iv)
+    public function encrypt(string $plaintext, string $iv) : string
     {
         $C = \AESGCM\AESGCM::encryptAndAppendTag($this->encrypt_key, $iv, $plaintext, null);
 
@@ -311,7 +311,7 @@ class user
         return base64_encode($C);
     }
 
-    public function decrypt(string $ciphertext, string $iv)
+    public function decrypt(string $ciphertext, string $iv) : string
     {
         $P = \AESGCM\AESGCM::decryptWithAppendedTag($this->encrypt_key, $iv, $ciphertext, null);
 
@@ -320,7 +320,7 @@ class user
         return $P;
     }
 
-    public function sendEmail(string $file, string $email, string $subject, array $twig_text)
+    public function sendEmail(string $file, string $email, string $subject, array $twig_text) : bool
     {
         $path_parts = pathinfo($file);
 
@@ -343,7 +343,7 @@ class user
         return false;
     }
 
-    public function confirmEmail(string $token, string $email)
+    public function confirmEmail(string $token, string $email) : bool
     {
         //get token from email
         if ($token_db = $this->db->row('SELECT users_id, token, timestamp FROM confirmation WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
@@ -382,7 +382,7 @@ class user
         return false;
     }
 
-    public function requestResetPassword(string $email)
+    public function requestResetPassword(string $email) : bool
     {
         //check if the user exists and is not disabled
         if ($user_id = $this->db->row('SELECT id, status FROM users WHERE email = ?', $email)) {
@@ -450,7 +450,7 @@ class user
         return false;
     }
 
-    public function confirmResetPassword(string $token, string $email, string $new_password)
+    public function confirmResetPassword(string $token, string $email, string $new_password) : bool
     {
         $zxcvbn = new Zxcvbn();
         $strength = $zxcvbn->passwordStrength($new_password, [$email]);
@@ -498,7 +498,7 @@ class user
         return false;
     }
 
-    public function checkBruteforce(string $email = null)
+    public function checkBruteforce(string $email = null) : bool
     {
         //returns a true or false depending on if the ip (or user) did too many failed requests in the last hour and we should show a captcha
         if (!is_null($email)) {
