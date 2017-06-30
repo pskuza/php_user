@@ -123,7 +123,7 @@ class user
                 }
 
                 //this will throw an exception should the record already exist (so we check at the top of login, if that session is already logged in...)
-                return $this->db->insert('logins', [
+                return (bool) $this->db->insert('logins', [
                     'sessions_id'          => session_id(),
                     'users_id'             => $ciphertext['id'],
                 ]);
@@ -415,7 +415,7 @@ class user
                         'company'            => 'php_user',
                     ]);
 
-                    return $this->db->insert('reset', [
+                    return (bool) $this->db->insert('reset', [
                         'users_id'  => $user_id['id'],
                         'token'     => $token,
                         'timestamp' => time(),
