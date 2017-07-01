@@ -24,11 +24,15 @@ class user
 
     protected $twig;
 
+    //remove those three
+
     protected $email_header_subject = 'php_user';
 
     protected $confirm_email_url = 'https://example.com/confirm/';
 
     protected $reset_password_url = 'https://example.com/reset/';
+
+    //
 
     public function __construct(\php_session\session $session, \ParagonIE\EasyDB\EasyDB $db, int $minimum_password_strength_zxcvbn, string $encrypt_key, array $mail_settings, string $twig_template_dir)
     {
@@ -71,20 +75,22 @@ class user
         }
     }
 
-    public function login(string $email, string $password): bool
+    public function login(string $email, string $password, string &$message = null): bool
     {
         if ($this->checklogin()) {
             //already logged in
-            return false;
+            return true;
         }
 
         if (empty($email)) {
             //no email
+            $message = 'E-Mail is empty.';
             return false;
         }
 
         if (empty($password) || !is_string($password)) {
             //no password, or not string
+            $message = 'Password is empty.';
             return false;
         }
 
@@ -92,9 +98,11 @@ class user
             //check if status === 1
             if ($ciphertext['status'] === 0) {
                 //email not confirmed yet, show resend button
+                $message = 'Account not confirmed yet.';
                 return false;
             } elseif ($ciphertext['status'] !== 1) {
                 //acc blocked, disabled or whatever
+                $message = 'Account disabled.';
                 return false;
             }
 
@@ -116,16 +124,16 @@ class user
                     $rehash_encrypted = $this->encrypt($hash, $iv);
 
                     $this->db->update('users', [
-                        'password' => base64_encode($iv) . '|' . $rehash_encrypted,
+                        'password' => base64_encode($iv).'|'.$rehash_encrypted,
                     ], [
                         'email' => $email,
                     ]);
                 }
 
                 //this will throw an exception should the record already exist (so we check at the top of login, if that session is already logged in...)
-                return (bool)$this->db->insert('logins', [
+                return (bool) $this->db->insert('logins', [
                     'sessions_id' => session_id(),
-                    'users_id' => $ciphertext['id'],
+                    'users_id'    => $ciphertext['id'],
                 ]);
             } else {
                 $this->addBruteforce($email);
@@ -134,6 +142,7 @@ class user
             $this->addBruteforce();
         }
 
+        $message = 'E-Mail or Password was wrong.';
         return false;
     }
 
@@ -172,7 +181,7 @@ class user
         if (!is_null($email)) {
             if ($users_id = $this->db->cell('SELECT id FROM users WHERE email = ?', $email)) {
                 $this->db->insert('fail_users', [
-                    'users_id' => $users_id,
+                    'users_id'  => $users_id,
                     'timestamp' => time(),
                 ]);
             }
@@ -181,23 +190,26 @@ class user
         $this->db->run('INSERT INTO fail_ip (ip, timestamp) VALUES (?, UNIX_TIMESTAMP())', inet_pton($_SERVER['REMOTE_ADDR']));
     }
 
-    public function register(string $email, string $password): bool
+    public function register(string $email, string $password, string &$message = null): bool
     {
         //to do: add messages to all falses
 
         if (empty($email)) {
             //no email
+            $message = 'E-Mail is empty.';
             return false;
         }
 
         if (empty($password) || !is_string($password)) {
             //no password, or not string
+            $message = 'Password is empty.';
             return false;
         }
 
         $validator = new EmailValidator();
         if (!$validator->isValid($email, new RFCValidation())) {
             //not valid
+            $message = 'E-Mail is invalid.';
             return false;
         }
 
@@ -205,13 +217,17 @@ class user
         $strength = $zxcvbn->passwordStrength($password, [$email]);
         if ($strength['score'] <= $this->minimum_password_strength_zxcvbn) {
             //too weak
+            $message = 'Password is too weak.';
             return false;
         }
 
         //check if email is taken
-        if ($this->db->cell('SELECT id FROM users WHERE email = ?', $email)) {
+        if ($user_id = $this->db->cell('SELECT id, status FROM users WHERE email = ?', $email)) {
             // already taken
-            return false;
+            if ($user_id['status'] !== 1) {
+                $message = 'E-Mail already taken.';
+                return false;
+            }
         }
 
         //everything looks fine, register user
@@ -223,28 +239,28 @@ class user
         $ciphertext = $this->encrypt($hash, $iv);
 
         $user_id = $this->db->insertGet('users', [
-            'email' => $email,
-            'password' => base64_encode($iv) . '|' . $ciphertext,
+            'email'    => $email,
+            'password' => base64_encode($iv).'|'.$ciphertext,
         ], 'id');
 
         $token = bin2hex(random_bytes(24));
 
-        $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Confirm your mail address.', [
-            'pageTitle' => $this->email_header_subject . ' - Confirm your mail address.',
-            'preview' => $this->email_header_subject . ' - Confirm your mail address.',
-            'email' => $email,
-            'message' => 'You registered a ' . $this->email_header_subject . ' account. Please click the button or link below to confirm this address and enable your account.',
-            'button' => true,
-            'button_link' => $this->confirm_email_url . $token . '/' . urlencode($email),
-            'buttontext' => 'Confirm',
-            'message2' => 'Should you have difficulties enabling your account contact support.',
-            'small_help_message' => 'If the button does not work visit the following link: ' . $this->confirm_email_url . $token . '/' . urlencode($email),
-            'company' => 'php_user',
+        $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Confirm your mail address.', [
+            'pageTitle'          => $this->email_header_subject.' - Confirm your mail address.',
+            'preview'            => $this->email_header_subject.' - Confirm your mail address.',
+            'email'              => $email,
+            'message'            => 'You registered a '.$this->email_header_subject.' account. Please click the button or link below to confirm this address and enable your account.',
+            'button'             => true,
+            'button_link'        => $this->confirm_email_url.$token.'/'.urlencode($email),
+            'buttontext'         => 'Confirm',
+            'message2'           => 'Should you have difficulties enabling your account contact support.',
+            'small_help_message' => 'If the button does not work visit the following link: '.$this->confirm_email_url.$token.'/'.urlencode($email),
+            'company'            => 'php_user',
         ]);
 
-        return (bool)$this->db->insert('confirmation', [
-            'users_id' => $user_id,
-            'token' => $token,
+        return (bool) $this->db->insert('confirmation', [
+            'users_id'  => $user_id,
+            'token'     => $token,
             'timestamp' => time(),
         ]);
     }
@@ -254,7 +270,7 @@ class user
         $path_parts = pathinfo($file);
 
         $template = $this->twig->loadTemplate($file);
-        $template_text = $this->twig->loadTemplate($path_parts['filename'] . '_text.' . $path_parts['extension']);
+        $template_text = $this->twig->loadTemplate($path_parts['filename'].'_text.'.$path_parts['extension']);
 
         $this->phpmailer->addAddress($email);
         $this->phpmailer->isHTML(true);
@@ -282,15 +298,17 @@ class user
         return '';
     }
 
-    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = true): bool
+    public function changePassword(string $old_password, string $new_password, string $email, bool $notify_email = true, string &$message = null): bool
     {
         if (empty($old_password) || !is_string($old_password)) {
             //no password, or not string
+            $message = 'Password was empty.';
             return false;
         }
 
         if (empty($new_password) || !is_string($new_password)) {
             //no password, or not string
+            $message = 'New password was empty.';
             return false;
         }
 
@@ -298,6 +316,7 @@ class user
         $strength = $zxcvbn->passwordStrength($new_password, [$email, $old_password]);
         if ($strength['score'] <= $this->minimum_password_strength_zxcvbn) {
             //too weak
+            $message = 'New password is too weak.';
             return false;
         }
 
@@ -315,21 +334,21 @@ class user
 
                 $ciphertext_new = $this->encrypt($hash, $iv);
 
-                $this->db->update('users', ['password' => base64_encode($iv) . '|' . $ciphertext_new], ['email' => $email]);
+                $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new], ['email' => $email]);
 
                 //delete all logins for this id
 
                 //send email if true
                 if ($notify_email) {
-                    $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Your Password was changed.', [
-                        'pageTitle' => $this->email_header_subject . ' - Your Password was changed.',
-                        'preview' => $this->email_header_subject . ' - Your Password was changed.',
-                        'email' => $email,
-                        'message' => 'Someone (hopefully you) changed your current password to your ' . $this->email_header_subject . ' account.',
-                        'button' => false,
-                        'message2' => 'Should you have difficulties accessing your account again contact support.',
+                    $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Your Password was changed.', [
+                        'pageTitle'          => $this->email_header_subject.' - Your Password was changed.',
+                        'preview'            => $this->email_header_subject.' - Your Password was changed.',
+                        'email'              => $email,
+                        'message'            => 'Someone (hopefully you) changed your current password to your '.$this->email_header_subject.' account.',
+                        'button'             => false,
+                        'message2'           => 'Should you have difficulties accessing your account again contact support.',
                         'small_help_message' => '',
-                        'company' => 'php_user',
+                        'company'            => 'php_user',
                     ]);
                 }
 
@@ -345,6 +364,7 @@ class user
             $this->addBruteforce();
         }
 
+        $message = 'Wrong password.';
         return false;
     }
 
@@ -358,7 +378,7 @@ class user
         return $this->session->logout();
     }
 
-    public function confirmEmail(string $token, string $email): bool
+    public function confirmEmail(string $token, string $email, string &$message = null): bool
     {
         //get token from email
         if ($token_db = $this->db->row('SELECT users_id, token, timestamp FROM confirmation WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
@@ -368,6 +388,29 @@ class user
                 $this->db->delete('confirmation', [
                     'users_id' => $token_db['users_id'],
                 ]);
+
+                $token = bin2hex(random_bytes(24));
+
+                $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Confirm your mail address.', [
+                    'pageTitle'          => $this->email_header_subject.' - Confirm your mail address.',
+                    'preview'            => $this->email_header_subject.' - Confirm your mail address.',
+                    'email'              => $email,
+                    'message'            => 'You registered a '.$this->email_header_subject.' account. Please click the button or link below to confirm this address and enable your account.',
+                    'button'             => true,
+                    'button_link'        => $this->confirm_email_url.$token.'/'.urlencode($email),
+                    'buttontext'         => 'Confirm',
+                    'message2'           => 'Should you have difficulties enabling your account contact support.',
+                    'small_help_message' => 'If the button does not work visit the following link: '.$this->confirm_email_url.$token.'/'.urlencode($email),
+                    'company'            => 'php_user',
+                ]);
+
+                $this->db->insert('confirmation', [
+                    'users_id'  => $token_db['users_id'],
+                    'token'     => $token,
+                    'timestamp' => time(),
+                ]);
+
+                $message = 'This token ran out. Confirmation E-Mail was resent.';
 
                 return false;
             }
@@ -394,15 +437,17 @@ class user
         }
 
         //token not found
+        $message = 'Invalid token.';
         return false;
     }
 
-    public function requestResetPassword(string $email): bool
+    public function requestResetPassword(string $email, string &$message = null): bool
     {
         //check if the user exists and is not disabled
         if ($user_id = $this->db->row('SELECT id, status FROM users WHERE email = ?', $email)) {
             //check if status === 1
             if ($user_id['status'] !== 1) {
+                $message = 'Account is disabled or not confirmed yet.';
                 return false;
             }
             //check if a password request is not already in progress
@@ -415,46 +460,47 @@ class user
 
                     //resend new since old one is invalid
                     $token = bin2hex(random_bytes(24));
-                    $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
-                        'pageTitle' => $this->email_header_subject . ' - Password reset request.',
-                        'preview' => $this->email_header_subject . ' - Password reset request.',
-                        'email' => $email,
-                        'message' => 'Someone (hopefully you) requested to reset your ' . $this->email_header_subject . ' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
-                        'button' => true,
-                        'button_link' => $this->reset_password_url . $token . '/' . urlencode($email),
-                        'buttontext' => 'Reset',
-                        'message2' => 'Should you have difficulties enabling your account contact support.',
-                        'small_help_message' => 'If the button does not work visit the following link: ' . $this->reset_password_url . $token . '/' . urlencode($email),
-                        'company' => 'php_user',
+                    $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Password reset request.', [
+                        'pageTitle'          => $this->email_header_subject.' - Password reset request.',
+                        'preview'            => $this->email_header_subject.' - Password reset request.',
+                        'email'              => $email,
+                        'message'            => 'Someone (hopefully you) requested to reset your '.$this->email_header_subject.' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
+                        'button'             => true,
+                        'button_link'        => $this->reset_password_url.$token.'/'.urlencode($email),
+                        'buttontext'         => 'Reset',
+                        'message2'           => 'Should you have difficulties enabling your account contact support.',
+                        'small_help_message' => 'If the button does not work visit the following link: '.$this->reset_password_url.$token.'/'.urlencode($email),
+                        'company'            => 'php_user',
                     ]);
 
-                    return (bool)$this->db->insert('reset', [
-                        'users_id' => $user_id['id'],
-                        'token' => $token,
+                    return (bool) $this->db->insert('reset', [
+                        'users_id'  => $user_id['id'],
+                        'token'     => $token,
                         'timestamp' => time(),
                     ]);
                 } else {
                     //there is already one in progress
+                    $message = 'A reset is already in progress.';
                     return false;
                 }
             } else {
                 $token = bin2hex(random_bytes(24));
-                $this->sendEmail('email.twig', $email, $this->email_header_subject . ' - Password reset request.', [
-                    'pageTitle' => $this->email_header_subject . ' - Password reset request.',
-                    'preview' => $this->email_header_subject . ' - Password reset request.',
-                    'email' => $email,
-                    'message' => 'Someone (hopefully you) requested to reset your ' . $this->email_header_subject . ' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
-                    'button' => true,
-                    'button_link' => $this->reset_password_url . $token . '/' . urlencode($email),
-                    'buttontext' => 'Reset',
-                    'message2' => 'Should you have difficulties enabling your account contact support.',
-                    'small_help_message' => 'If the button does not work visit the following link: ' . $this->reset_password_url . $token . '/' . urlencode($email),
-                    'company' => 'php_user',
+                $this->sendEmail('email.twig', $email, $this->email_header_subject.' - Password reset request.', [
+                    'pageTitle'          => $this->email_header_subject.' - Password reset request.',
+                    'preview'            => $this->email_header_subject.' - Password reset request.',
+                    'email'              => $email,
+                    'message'            => 'Someone (hopefully you) requested to reset your '.$this->email_header_subject.' account password. Please click the button or link below to reset your password. If you did not request it you can safely ignore this email',
+                    'button'             => true,
+                    'button_link'        => $this->reset_password_url.$token.'/'.urlencode($email),
+                    'buttontext'         => 'Reset',
+                    'message2'           => 'Should you have difficulties enabling your account contact support.',
+                    'small_help_message' => 'If the button does not work visit the following link: '.$this->reset_password_url.$token.'/'.urlencode($email),
+                    'company'            => 'php_user',
                 ]);
 
-                return (bool)$this->db->insert('reset', [
-                    'users_id' => $user_id['id'],
-                    'token' => $token,
+                return (bool) $this->db->insert('reset', [
+                    'users_id'  => $user_id['id'],
+                    'token'     => $token,
                     'timestamp' => time(),
                 ]);
             }
@@ -462,10 +508,11 @@ class user
             $this->addBruteforce();
         }
 
+        $message = 'E-Mail not found.';
         return false;
     }
 
-    public function confirmResetPassword(string $token, string $email, string $new_password): bool
+    public function confirmResetPassword(string $token, string $email, string $new_password, string &$message = null): bool
     {
         //get token from email
         if ($token_db = $this->db->row('SELECT users_id, token, timestamp FROM reset WHERE users_id = (SELECT id FROM users WHERE email = ?)', $email)) {
@@ -475,16 +522,16 @@ class user
                 $this->db->delete('reset', [
                     'users_id' => $token_db['users_id'],
                 ]);
-
+                $message = 'This token ran out. Try to request it again.';
                 return false;
             }
 
             if (hash_equals($token_db['token'], $token)) {
-
                 $zxcvbn = new Zxcvbn();
                 $strength = $zxcvbn->passwordStrength($new_password, [$email]);
                 if ($strength['score'] <= $this->minimum_password_strength_zxcvbn) {
                     //too weak
+                    $message = 'The new password is too weak.';
                     return false;
                 }
 
@@ -494,7 +541,7 @@ class user
 
                 $ciphertext_new = $this->encrypt($hash, $iv);
 
-                $this->db->update('users', ['password' => base64_encode($iv) . '|' . $ciphertext_new], ['email' => $email]);
+                $this->db->update('users', ['password' => base64_encode($iv).'|'.$ciphertext_new], ['email' => $email]);
 
                 $this->db->delete('reset', [
                     'users_id' => $token_db['users_id'],
@@ -509,6 +556,7 @@ class user
         }
 
         //token not found
+        $message = 'Invalid token.';
         return false;
     }
 
