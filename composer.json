@@ -16,7 +16,7 @@
     "php": "^7",
     "pskuza/php_session": "1.*",
     "spomky-labs/php-aes-gcm": "1.*",
-    "phpmailer/phpmailer": "6.*",
+    "phpmailer/phpmailer": "~6.0",
     "egulias/email-validator": "~2.1",
     "google/recaptcha": "1.*",
     "bjeavons/zxcvbn-php": "^0.3",

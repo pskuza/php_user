@@ -7,6 +7,7 @@ namespace php_user;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\RFCValidation;
 use ZxcvbnPhp\Zxcvbn;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class user
 {
@@ -51,7 +52,7 @@ class user
 
         $this->encrypt_key = hex2bin($encrypt_key);
 
-        $phpmailer = new \PHPMailer();
+        $phpmailer = new PHPMailer;
         $phpmailer->isSMTP();
         $phpmailer->Host = $mail_settings['host'];
         $phpmailer->SMTPAuth = true;
