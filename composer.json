@@ -14,11 +14,11 @@
   ],
   "require": {
     "php": "^7",
-    "pskuza/php_session": "0.*",
+    "pskuza/php_session": "1.*",
     "spomky-labs/php-aes-gcm": "1.*",
-    "phpmailer/phpmailer": "~5.2",
+    "phpmailer/phpmailer": "6.*",
     "egulias/email-validator": "~2.1",
-    "google/recaptcha": "~1.1",
+    "google/recaptcha": "1.*",
     "bjeavons/zxcvbn-php": "^0.3",
     "paragonie/constant_time_encoding": "2.*",
     "twig/twig": "^2.0"
